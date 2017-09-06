@@ -1,6 +1,6 @@
 <?php
 
-if (!defined('_PS_VERSION_'))
+if (!defined('_TB_VERSION_'))
     exit;
 
 /**
@@ -21,9 +21,7 @@ if (!defined('_PS_VERSION_'))
  * You should have received a copy of the GNU General Public License
  * along with PiwikAnalyticsJS for prestashop.  If not, see <http://www.gnu.org/licenses/>.
  *
- *
- * @author dh42
- * @link https://dh42.com/free-prestashop-modules/prestashop-piwik-statistics/
+ * @author Christian M. Jensen
  * @deprecated http://cmjnisse.github.io/piwikanalyticsjs-prestashop
  * @license http://www.gnu.org/licenses/gpl-3.0.html GPL v3 or later
  */
