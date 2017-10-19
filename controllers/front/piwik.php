@@ -1,33 +1,26 @@
 <?php
-
-/*
- * Copyright (C) 2015 dh42
+/**
+ * 2007-2016 PrestaShop
  *
- * This file is part of PiwikAnalyticsJS for prestashop.
+ * thirty bees is an extension to the PrestaShop e-commerce software developed by PrestaShop SA
+ * Copyright (C) 2017 thirty bees
  *
- * PiwikAnalyticsJS for prestashop is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * NOTICE OF LICENSE
  *
- * PiwikAnalyticsJS for prestashop is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * This source file is subject to the Academic Free License (AFL 3.0)
+ * that is bundled with this package in the file LICENSE.txt.
+ * It is also available through the world-wide-web at this URL:
+ * http://opensource.org/licenses/afl-3.0.php
+ * If you did not receive a copy of the license and are unable to
+ * obtain it through the world-wide-web, please send an email
+ * to license@thirtybees.com so we can send you a copy immediately.
  *
- * You should have received a copy of the GNU General Public License
- * along with PiwikAnalyticsJS for prestashop.  If not, see <http://www.gnu.org/licenses/>.
- *
- * @link http://cmjnisse.github.io/piwikanalyticsjs-prestashop
- * @license http://www.gnu.org/licenses/gpl-3.0.html GPL v3 or later
- *
- * ***** THIS FILE USES CODE FROM PIWIK PROXY SCRIPT *****
- *
- * Piwik - free/libre analytics platform
- * Piwik Proxy Hide URL
- *
- * @link http://piwik.org/faq/how-to/#faq_132
- * @license http://www.gnu.org/licenses/gpl-3.0.html GPL v3 or later
+ * @author    thirty bees <modules@thirtybees.com>
+ * @author    PrestaShop SA <contact@prestashop.com>
+ * @copyright 2017 thirty bees
+ * @copyright 2007-2016 PrestaShop SA
+ * @license   http://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
+ * PrestaShop is an internationally registered trademark & property of PrestaShop SA
  */
 
 if (!defined('_PS_VERSION_'))

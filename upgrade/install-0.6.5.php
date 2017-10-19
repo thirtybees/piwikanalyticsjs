@@ -1,7 +1,7 @@
 <?php
-
-/*
- * Copyright (C) 2015 dh42
+/**
+ * Copyright (C) 2017 thirty bees
+ * Copyright (C) 2014 Christian Jensen
  *
  * This file is part of PiwikAnalyticsJS for prestashop.
  *
@@ -18,8 +18,9 @@
  * You should have received a copy of the GNU General Public License
  * along with PiwikAnalyticsJS for prestashop.  If not, see <http://www.gnu.org/licenses/>.
  *
- *
- * @link http://cmjnisse.github.io/piwikanalyticsjs-prestashop
+ * @author thirty bees <contact@thirtybees.com>
+ * @author Christian M. Jensen
+ * @deprecated http://cmjnisse.github.io/piwikanalyticsjs-prestashop
  * @license http://www.gnu.org/licenses/gpl-3.0.html GPL v3 or later
  */
 

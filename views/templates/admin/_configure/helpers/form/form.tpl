@@ -1,26 +1,26 @@
 {*
- * Copyright (C) 2015 Christian Jensen
+ * 2007-2016 PrestaShop
  *
- * This file is part of PiwikAnalyticsJS for prestashop.
- * 
- * PiwikAnalyticsJS for prestashop is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- * 
- * PiwikAnalyticsJS for prestashop is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- * 
- * You should have received a copy of the GNU General Public License
- * along with PiwikAnalyticsJS for prestashop.  If not, see <http://www.gnu.org/licenses/>.
+ * thirty bees is an extension to the PrestaShop e-commerce software developed by PrestaShop SA
+ * Copyright (C) 2017 thirty bees
  *
+ * NOTICE OF LICENSE
  *
- * @author Christian M. Jensen
- * @link http://cmjnisse.github.io/piwikanalyticsjs-prestashop
- * @license http://www.gnu.org/licenses/gpl-3.0.html GPL v3 or later
- *}
+ * This source file is subject to the Academic Free License (AFL 3.0)
+ * that is bundled with this package in the file LICENSE.txt.
+ * It is also available through the world-wide-web at this URL:
+ * http://opensource.org/licenses/afl-3.0.php
+ * If you did not receive a copy of the license and are unable to
+ * obtain it through the world-wide-web, please send an email
+ * to license@thirtybees.com so we can send you a copy immediately.
+ *
+ * @author    thirty bees <modules@thirtybees.com>
+ * @author    PrestaShop SA <contact@prestashop.com>
+ * @copyright 2017 thirty bees
+ * @copyright 2007-2016 PrestaShop SA
+ * @license   http://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
+ * PrestaShop is an internationally registered trademark & property of PrestaShop SA
+*}
 {extends file="helpers/form/form.tpl"}
 
 {block name="input"}
