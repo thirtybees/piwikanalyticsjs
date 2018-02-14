@@ -68,7 +68,7 @@
     {if $PIWIK_CART eq true}
         {if is_array($PIWIK_CART_PRODUCTS)}
             {foreach from=$PIWIK_CART_PRODUCTS item=_product}
-                _paq.push(['addEcommerceItem', '{$_product.SKU}', '{$_product.NAME}', {$_product.CATEGORY}, '{$_product.PRICE}', '{$_product.QUANTITY}']);
+                _paq.push(['addEcommerceItem', '{$_product.SKU}', "{$_product.NAME}", {$_product.CATEGORY}, '{$_product.PRICE}', '{$_product.QUANTITY}']);
             {/foreach}
         {/if}
         {if isset($PIWIK_CART_TOTAL)}
@@ -78,7 +78,7 @@
     {if $PIWIK_ORDER eq true}
         {if is_array($PIWIK_ORDER_PRODUCTS)}
             {foreach from=$PIWIK_ORDER_PRODUCTS item=_product}
-                _paq.push(['addEcommerceItem', '{$_product.SKU}', '{$_product.NAME}', {$_product.CATEGORY}, '{$_product.PRICE}', '{$_product.QUANTITY}']);
+                _paq.push(['addEcommerceItem', '{$_product.SKU}', "{$_product.NAME}", {$_product.CATEGORY}, '{$_product.PRICE}', '{$_product.QUANTITY}']);
             {/foreach}
         {/if}
         _paq.push(['trackEcommerceOrder',"{$PIWIK_ORDER_DETAILS.order_id}", '{$PIWIK_ORDER_DETAILS.order_total}', '{$PIWIK_ORDER_DETAILS.order_sub_total}', '{$PIWIK_ORDER_DETAILS.order_tax}', '{$PIWIK_ORDER_DETAILS.order_shipping}', '{$PIWIK_ORDER_DETAILS.order_discount}']);
