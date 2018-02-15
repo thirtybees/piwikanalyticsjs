@@ -55,7 +55,7 @@ class piwikanalyticsjs extends Module {
         $this->tab = 'analytics_stats';
         $this->version = '1.1.2';
         $this->author = 'thirty bees';
-        $this->displayName = 'Piwik Web Analytics';
+        $this->displayName = $this->l('Matomo Web Analytics');
 
         $this->bootstrap = true;
 
@@ -71,7 +71,7 @@ class piwikanalyticsjs extends Module {
         if ($this->id && !Configuration::get(PKHelper::CPREFIX . 'HOST'))
             $this->warning = (isset($this->warning) && !empty($this->warning) ? $this->warning . ',<br/> ' : '') . $this->l('is not ready to roll you need to configure the Piwik server url');
 
-        $this->description = $this->l('Piwik Web Analytics Javascript plugin');
+        $this->description = $this->l('Matomo Web Analytics Javascript plugin');
         $this->confirmUninstall = $this->l('Are you sure you want to delete this plugin ?');
 
         self::$_isOrder = FALSE;
