@@ -22,37 +22,37 @@
  * PrestaShop is an internationally registered trademark & property of PrestaShop SA
 *}
 <script type="text/javascript">
-    var idPKSiteId = '{$psl_CPREFIX}SITEID';
-    var idPKToken = '{$psl_CPREFIX}TOKEN_AUTH';
-    var htmls000 = "<div><a href=\"#close\" onclick=\"PiwikLookup();\" title=\"{l s='Close' mod='piwikanalyticsjs'}\" class=\"PiwikLookupClose\">X</a>";
+    var idPKSiteId = '{$psl_CPREFIX|escape:'javascript'}SITEID';
+    var idPKToken = '{$psl_CPREFIX|escape:'javascript'}TOKEN_AUTH';
+    var htmls000 = "<div><a href=\"#close\" onclick=\"PiwikLookup();\" title=\"{l s='Close' mod='piwikanalyticsjs' js=1}\" class=\"PiwikLookupClose\">X</a>";
     htmls000 += "<h2>Piwik credentials</h2>";
     htmls000 += "<p>{l s='Enter username and password of your piwik login, wee need this to get your api key (auth token)' mod='piwikanalyticsjs'}</p>";
     htmls000 += "<form id=\"PiwikLookupLoginForm\" action=\"POST\" onsubmit=\"return PiwikLookupLogin();\"><p>";
-    htmls000 += "<label for=\"PiwikLookupLoginFormUsername\" style=\"width: 100%; text-align: left;\">{l s='Username:' mod='piwikanalyticsjs'}</label>";
+    htmls000 += "<label for=\"PiwikLookupLoginFormUsername\" style=\"width: 100%; text-align: left;\">{l s='Username:' mod='piwikanalyticsjs' js=1}</label>";
     htmls000 += "<input id=\"PiwikLookupLoginFormUsername\" type=\"TEXT\" style=\"height: 25px; width: 386px;\"/>";
     htmls000 += "</p><p>";
-    htmls000 += "<label for=\"PiwikLookupLoginFormPassword\" style=\"width: 100%; text-align: left;\">{l s='Password:' mod='piwikanalyticsjs'}</label>";
+    htmls000 += "<label for=\"PiwikLookupLoginFormPassword\" style=\"width: 100%; text-align: left;\">{l s='Password:' mod='piwikanalyticsjs' js=1}</label>";
     htmls000 += "<input id=\"PiwikLookupLoginFormPassword\" type=\"PASSWORD\" style=\"height: 25px; width: 386px;\"/>";
     htmls000 += "</p><p>";
     
     htmls000 += "<label for=\"PiwikLookupLoginFormHttpAuthSettings\" style=\"width: 100%; text-align: left;\">";
     htmls000 += "<input id=\"PiwikLookupLoginFormHttpAuthSettings\" type=\"CHECKBOX\" onclick='if(this.checked) { $(\"#PiwikLookupLoginFormHttpAuthSettingsWraper\").show(); } else { $(\"#PiwikLookupLoginFormHttpAuthSettingsWraper\").hide(); }'/>";
-    htmls000 += "{l s='HTTP Basic Authorization?' mod='piwikanalyticsjs'}";
+    htmls000 += "{l s='HTTP Basic Authorization?' mod='piwikanalyticsjs' js=1}";
     htmls000 += "</label><br/>";
     htmls000 += "</p><div id=\"PiwikLookupLoginFormHttpAuthSettingsWraper\" style=\"display:none;\">";
     
-    htmls000 += "<label for=\"PiwikLookupLoginFormHttpAuthUsername\" style=\"width: 100%; text-align: left;\">{l s='HTTP Authorization Username:' mod='piwikanalyticsjs'}</label>";
+    htmls000 += "<label for=\"PiwikLookupLoginFormHttpAuthUsername\" style=\"width: 100%; text-align: left;\">{l s='HTTP Authorization Username:' mod='piwikanalyticsjs' js=1}</label>";
     htmls000 += "<input id=\"PiwikLookupLoginFormHttpAuthUsername\" type=\"TEXT\" style=\"height: 25px; width: 386px;\"/>";
     htmls000 += "</p><p>";
-    htmls000 += "<label for=\"PiwikLookupLoginFormHttpAuthPassword\" style=\"width: 100%; text-align: left;\">{l s='HTTP Authorization Password:' mod='piwikanalyticsjs'}</label>";
+    htmls000 += "<label for=\"PiwikLookupLoginFormHttpAuthPassword\" style=\"width: 100%; text-align: left;\">{l s='HTTP Authorization Password:' mod='piwikanalyticsjs' js=1}</label>";
     htmls000 += "<input id=\"PiwikLookupLoginFormHttpAuthPassword\" type=\"PASSWORD\" style=\"height: 25px; width: 386px;\"/>";
     htmls000 += "</p><p>";
 
     htmls000 += "</div><p>";
-    htmls000 += "<input type=\"SUBMIT\" value=\"{l s='Login' mod='piwikanalyticsjs'}\" />";
+    htmls000 += "<input type=\"SUBMIT\" value=\"{l s='Login' mod='piwikanalyticsjs' js=1}\" />";
     htmls000 += "</p></form></div>";
-    var htmls001 = '<a id="LookupSITEID" onclick="return PiwikLookup();" style="font-weight: bold; font-style: italic; color: rgb(88, 90, 105); font-size: 110%;" href="#">{l s="Fetch from Piwik" mod='piwikanalyticsjs'}</a>';
-    var htmls002 = '<a id="LookupTOKEN_AUTH" onclick="return PiwikLookup();" style="font-weight: bold; font-style: italic; color: rgb(88, 90, 105); font-size: 110%;" href="#">{l s="Fetch from Piwik" mod='piwikanalyticsjs'}</a>';
+    var htmls001 = '<a id="LookupSITEID" onclick="return PiwikLookup();" style="font-weight: bold; font-style: italic; color: rgb(88, 90, 105); font-size: 110%;" href="#">{l s="Fetch from Piwik" mod='piwikanalyticsjs' js=1}</a>';
+    var htmls002 = '<a id="LookupTOKEN_AUTH" onclick="return PiwikLookup();" style="font-weight: bold; font-style: italic; color: rgb(88, 90, 105); font-size: 110%;" href="#">{l s="Fetch from Piwik" mod='piwikanalyticsjs' js=1}</a>';
     $(document).ready(function(){
         if (($('#' + idPKSiteId).val() === '') || ($('#' + idPKSiteId).val() === '0') || (parseInt($('#' + idPKSiteId).val()) <= 0)){
             $('#' + idPKSiteId).parent().find("sup").after(htmls001);
@@ -93,14 +93,14 @@
         $('#PIWIK_USRNAME').val(username);
         $('#PIWIK_USRPASSWD').val(password);
         
-        piwikhost = prompt('{l s='Please enter piwik host' mod='piwikanalyticsjs'}', ($('#PIWIK_HOST').val().trim()==='' ? 'piwik.example.com/piwik2/' : $('#PIWIK_HOST').val().trim()));
+        piwikhost = prompt('{l s='Please enter piwik host' mod='piwikanalyticsjs' js=1}', ($('#PIWIK_HOST').val().trim()==='' ? 'piwik.example.com/piwik2/' : $('#PIWIK_HOST').val().trim()));
 		piwikhost = piwikhost.replace("http://", "").replace("https://", "").replace("://", "").replace("//", ""); 
         $('#PIWIK_HOST').val(piwikhost);
 		
         /* get auth token */
         $.ajax({
             type: 'POST',
-            url: '{$psl_currentIndex}&token={$psl_token}',
+            url: '{$psl_currentIndex|escape:'javascript'}&token={$psl_token|escape:'javascript'}',
             /*
              url: 'http://' + piwikhost + 'index.php?module=API&method=UsersManager.getTokenAuth&userLogin='+username+'&md5Password='+password+'&format=JSON'
              */
@@ -134,8 +134,8 @@
                                 }
                                 var html = [
                                     '<style>.tyujhgfdc li:hover{ background-color:#EEEEEE; }</style>',
-                                    '<div><a href="#close" onclick="PiwikLookup();" title="{l s='Close' mod='piwikanalyticsjs'}" class="PiwikLookupClose">X</a>',
-                                    '<h2>{l s='Select the site you are setting up.' mod='piwikanalyticsjs'}</h2>',
+                                    '<div><a href="#close" onclick="PiwikLookup();" title="{l s='Close' mod='piwikanalyticsjs' js=1}" class="PiwikLookupClose">X</a>',
+                                    '<h2>{l s='Select the site you are setting up.' mod='piwikanalyticsjs' js=1}</h2>',
                                     '<p><ul class="tyujhgfdc">' + siteshtml + '</ul>',
                                     '</p></div>',
                                 ];

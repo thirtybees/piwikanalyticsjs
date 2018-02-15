@@ -22,79 +22,84 @@
 *}
 
 <script type="text/javascript">
-        var u=(("https:" == document.location.protocol) ? "https://{$PIWIK_HOST}" : "http://{$PIWIK_HOST}");
-        var _paq = _paq || [];
-        {if isset($PIWIK_DNT)}{$PIWIK_DNT}{/if}
-        _paq.push(["setSiteId",{$PIWIK_SITEID}]);
-        {if $PIWIK_USE_PROXY eq true}
-            _paq.push(['setTrackerUrl',u]);
-        {else}
-            _paq.push(['setTrackerUrl', u+'piwik.php']);
-        {/if}
-        {if isset($PIWIK_COOKIE_DOMAIN) && $PIWIK_COOKIE_DOMAIN eq true}
-            _paq.push(['setCookieDomain', '{$PIWIK_COOKIE_DOMAIN}']);
-        {/if}
-        {if isset($PIWIK_SET_DOMAINS) && $PIWIK_SET_DOMAINS eq true}
-        _paq.push(['setDomains', {$PIWIK_SET_DOMAINS}]);
-        {/if}
-        {if isset($PIWIK_COOKIE_TIMEOUT)}
-        _paq.push(['setVisitorCookieTimeout', '{$PIWIK_COOKIE_TIMEOUT}']);
-        {/if}
-        {if isset($PIWIK_SESSION_TIMEOUT)}
-        _paq.push(['setSessionCookieTimeout', '{$PIWIK_SESSION_TIMEOUT}']);
-        {/if}
-        {if isset($PIWIK_RCOOKIE_TIMEOUT)}
-        _paq.push(['setReferralCookieTimeout', '{$PIWIK_RCOOKIE_TIMEOUT}']);
-        {/if}
-        _paq.push(['enableLinkTracking']);
+  (function () {
+    var u = (("https:" == document.location.protocol) ? "https://{$PIWIK_HOST|escape:'javascript'}" : "http://{$PIWIK_HOST|escape:'javascript'}");
+    var _paq = _paq || [];
+    {if isset($PIWIK_DNT)}{$PIWIK_DNT}{/if}
+    _paq.push(["setSiteId",{$PIWIK_SITEID|escape:'javascript'}]);
+    {if $PIWIK_USE_PROXY}
+    _paq.push(['setTrackerUrl', u]);
+    {else}
+    _paq.push(['setTrackerUrl', u + 'piwik.php']);
+    {/if}
+    {if isset($PIWIK_COOKIE_DOMAIN) && $PIWIK_COOKIE_DOMAIN}
+    _paq.push(['setCookieDomain', '{$PIWIK_COOKIE_DOMAIN|escape:'javascript'}']);
+    {/if}
+    {if isset($PIWIK_SET_DOMAINS) && $PIWIK_SET_DOMAINS}
+    _paq.push(['setDomains', {$PIWIK_SET_DOMAINS}]);
+    {/if}
+    {if isset($PIWIK_COOKIE_TIMEOUT)}
+    _paq.push(['setVisitorCookieTimeout', '{$PIWIK_COOKIE_TIMEOUT|escape:'javascript'}']);
+    {/if}
+    {if isset($PIWIK_SESSION_TIMEOUT)}
+    _paq.push(['setSessionCookieTimeout', '{$PIWIK_SESSION_TIMEOUT|escape:'javascript'}']);
+    {/if}
+    {if isset($PIWIK_RCOOKIE_TIMEOUT)}
+    _paq.push(['setReferralCookieTimeout', '{$PIWIK_RCOOKIE_TIMEOUT|escape:'javascript'}']);
+    {/if}
+    _paq.push(['enableLinkTracking']);
     {if isset($PIWIK_UUID)}
-        _paq.push(['setUserId', '{$PIWIK_UUID}']);
-        _paq.push(['setCustomVariable', 1, "First Name", "{$cookie->customer_firstname}", "visit"]);
-        _paq.push(['setCustomVariable', 2, "Last Name", "{$cookie->customer_lastname}", "visit"]);
-
+    _paq.push(['setUserId', '{$PIWIK_UUID|escape:'javascript'}']);
+    _paq.push(['setCustomVariable', 1, "First Name", "{$cookie->customer_firstname|escape:'javascript'}", "visit"]);
+    _paq.push(['setCustomVariable', 2, "Last Name", "{$cookie->customer_lastname|escape:'javascript'}", "visit"]);
     {/if}
     {if isset($smarty.request.email)}
-        _paq.push(['setUserId', '{$smarty.request.email}']);
-
+    _paq.push(['setUserId', '{$smarty.request.email|escape:'javascript'}']);
     {/if}
     {if isset($PIWIK_PRODUCTS) && is_array($PIWIK_PRODUCTS)}
-        {foreach from=$PIWIK_PRODUCTS item=piwikproduct}
-            _paq.push(['setEcommerceView', '{$piwikproduct.SKU}', '{$piwikproduct.NAME|escape:'htmlall':'UTF-8'}', {$piwikproduct.CATEGORY}, '{$piwikproduct.PRICE|floatval}']);
-        {/foreach}
+    {foreach from=$PIWIK_PRODUCTS item=piwikproduct}
+    _paq.push(['setEcommerceView', '{$piwikproduct.SKU|escape:'javascript'}', '{$piwikproduct.NAME|escape:'javascript'}', {$piwikproduct.CATEGORY|escape:'javascript'}, '{$piwikproduct.PRICE|floatval}']);
+    {/foreach}
     {/if}
     {if isset($piwik_category) && is_array($piwik_category)}
-            _paq.push(['setEcommerceView', false, false, '{$piwik_category.NAME|escape:'htmlall':'UTF-8'}']);
+    _paq.push(['setEcommerceView', false, false, '{$piwik_category.NAME|escape:'htmlall':'UTF-8'}']);
     {/if}
-    {if $PIWIK_CART eq true}
-        {if is_array($PIWIK_CART_PRODUCTS)}
-            {foreach from=$PIWIK_CART_PRODUCTS item=_product}
-                _paq.push(['addEcommerceItem', '{$_product.SKU}', '{$_product.NAME}', {$_product.CATEGORY}, '{$_product.PRICE}', '{$_product.QUANTITY}']);
-            {/foreach}
-        {/if}
-        {if isset($PIWIK_CART_TOTAL)}
-            _paq.push(['trackEcommerceCartUpdate', {$PIWIK_CART_TOTAL|floatval}]);
-        {/if}
+    {if $PIWIK_CART}
+    {if is_array($PIWIK_CART_PRODUCTS)}
+    {foreach from=$PIWIK_CART_PRODUCTS item=_product}
+    _paq.push(['addEcommerceItem', '{$_product.SKU|escape:'javascript'}', '{$_product.NAME|escape:'javascript'}', {$_product.CATEGORY|escape:'javascript'}, '{$_product.PRICE|escape:'javascript'}', '{$_product.QUANTITY|escape:'javascript'}']);
+    {/foreach}
     {/if}
-    {if $PIWIK_ORDER eq true}
-        {if is_array($PIWIK_ORDER_PRODUCTS)}
-            {foreach from=$PIWIK_ORDER_PRODUCTS item=_product}
-                _paq.push(['addEcommerceItem', '{$_product.SKU}', '{$_product.NAME}', {$_product.CATEGORY}, '{$_product.PRICE}', '{$_product.QUANTITY}']);
-            {/foreach}
-        {/if}
-        _paq.push(['trackEcommerceOrder',"{$PIWIK_ORDER_DETAILS.order_id}", '{$PIWIK_ORDER_DETAILS.order_total}', '{$PIWIK_ORDER_DETAILS.order_sub_total}', '{$PIWIK_ORDER_DETAILS.order_tax}', '{$PIWIK_ORDER_DETAILS.order_shipping}', '{$PIWIK_ORDER_DETAILS.order_discount}']);
+    {if isset($PIWIK_CART_TOTAL)}
+    _paq.push(['trackEcommerceCartUpdate', {$PIWIK_CART_TOTAL|floatval}]);
+    {/if}
+    {/if}
+    {if $PIWIK_ORDER}
+    {if is_array($PIWIK_ORDER_PRODUCTS)}
+    {foreach from=$PIWIK_ORDER_PRODUCTS item=_product}
+    _paq.push(['addEcommerceItem', '{$_product.SKU|escape:'javascript'}', '{$_product.NAME|escape:'javascript'}', {$_product.CATEGORY|escape:'javascript'}, '{$_product.PRICE|escape:'javascript'}', '{$_product.QUANTITY|escape:'javascript'}']);
+    {/foreach}
+    {/if}
+    _paq.push(['trackEcommerceOrder', "{$PIWIK_ORDER_DETAILS.order_id|escape:'javascript'}", '{$PIWIK_ORDER_DETAILS.order_total|escape:'javascript'}', '{$PIWIK_ORDER_DETAILS.order_sub_total|escape:'javascript'}', '{$PIWIK_ORDER_DETAILS.order_tax|escape:'javascript'}', '{$PIWIK_ORDER_DETAILS.order_shipping|escape:'javascript'}', '{$PIWIK_ORDER_DETAILS.order_discount|escape:'javascript'}']);
     {/if}
     {if isset($PIWIK_SITE_SEARCH) && !isset($PIWIK_PRODUCTS)}
-        {$PIWIK_SITE_SEARCH}
+    {$PIWIK_SITE_SEARCH}
     {else}
-        {if isset($PK404) && $PK404 eq true}
-        _paq.push(['setDocumentTitle',  '404/URL = ' +  encodeURIComponent(document.location.pathname+document.location.search) + '/From = ' + encodeURIComponent(document.referrer)]);
-        {/if}
-        _paq.push(['trackPageView']);
+    {if !empty($PK404)}
+    _paq.push(['setDocumentTitle', '404/URL = ' + encodeURIComponent(document.location.pathname + document.location.search) + '/From = ' + encodeURIComponent(document.referrer)]);
     {/if}
-    {literal}
-        (function() {var d = document, g = d.createElement("script"), s = d.getElementsByTagName("script")[0];g.type = "text/javascript";g.defer = true;g.async = true;g.src = {/literal}{if $PIWIK_USE_PROXY eq true}{literal}u{/literal}{else}{literal}u+'piwik.js'{/literal}{/if}{literal};s.parentNode.insertBefore(g, s);})();
-    {/literal}
+    _paq.push(['trackPageView']);
+    {/if}
+    (function () {
+      var d = document, g = d.createElement("script"), s = d.getElementsByTagName("script")[0];
+      g.type = "text/javascript";
+      g.defer = true;
+      g.async = true;
+      g.src = {if $PIWIK_USE_PROXY}u{else}u + 'piwik.js'{/if};
+      s.parentNode.insertBefore(g, s);
+    })();
+  }());
 </script>
 {if isset($PIWIK_EXHTML)}
-    {$PIWIK_EXHTML}
+{$PIWIK_EXHTML}
 {/if}
