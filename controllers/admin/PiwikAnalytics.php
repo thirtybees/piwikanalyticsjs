@@ -70,7 +70,7 @@ class PiwikAnalyticsController extends ModuleAdminController
         $user = Configuration::get('PIWIK_USRNAME');
         // 'PIWIK' . 'USRPASSWD'
         $passwd = Configuration::get('PIWIK_USRPASSWD');
-        if ((!empty($user) && $user !== FALSE) && (!empty($passwd) && $passwd !== FALSE)) {
+        if ((!empty($user) && $user !== false) && (!empty($passwd) && $passwd !== false)) {
             $this->page_header_toolbar_btn['stats'] = [
                 'href'   => $http.$PIWIK_HOST.'index.php?module=Login&action=logme&login='.$user.'&password='.md5($passwd).'&idSite='.$PIWIK_SITEID,
                 'desc'   => $this->l('Piwik'),
@@ -86,14 +86,15 @@ class PiwikAnalyticsController extends ModuleAdminController
         if ($this->display == 'view') {
 
             // Some controllers use the view action without an object
-            if ($this->className)
+            if ($this->className) {
                 $this->loadObject(true);
+            }
 
 
             $PIWIK_TOKEN_AUTH = Configuration::get('PIWIK_TOKEN_AUTH');
-            if ((empty($PIWIK_HOST) || $PIWIK_HOST === FALSE) ||
-                ($PIWIK_SITEID <= 0 || $PIWIK_SITEID === FALSE) ||
-                (empty($PIWIK_TOKEN_AUTH) || $PIWIK_TOKEN_AUTH === FALSE)) {
+            if ((empty($PIWIK_HOST) || $PIWIK_HOST === false) ||
+                ($PIWIK_SITEID <= 0 || $PIWIK_SITEID === false) ||
+                (empty($PIWIK_TOKEN_AUTH) || $PIWIK_TOKEN_AUTH === false)) {
 
                 $this->content .= "<h3 style=\"padding: 90px;\">{$this->l("You need to set 'Piwik host url', 'Piwik token auth' and 'Piwik site id', and save them before the dashboard can be shown here")}</h3>";
             } else {
@@ -109,7 +110,7 @@ class PiwikAnalyticsController extends ModuleAdminController
 EOF;
                 $lng = new Language($this->context->cookie->id_lang);
                 $DREPDATE = Configuration::get('PIWIK_DREPDATE');
-                if ($DREPDATE !== FALSE && (strpos($DREPDATE, '|') !== FALSE)) {
+                if ($DREPDATE !== false && (strpos($DREPDATE, '|') !== false)) {
                     list($period, $date) = explode('|', $DREPDATE);
                 } else {
                     $period = "day";

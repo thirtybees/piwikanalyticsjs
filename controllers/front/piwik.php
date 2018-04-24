@@ -140,6 +140,7 @@ class PiwikAnalyticsJSPiwikModuleFrontController extends ModuleFrontController
                 return $_SERVER[$ipKey];
             }
         }
+
         return !empty($_SERVER['REMOTE_ADDR']) ? $_SERVER['REMOTE_ADDR'] : null;
     }
 

@@ -71,6 +71,12 @@ class PiwikAnalyticsJs extends Module
     const RCOOKIE_TIMEOUT = 'PIWIK_RCOOKIE_TIMEOUT';
     const ORDER = 'PIWIK_ORDER';
     const CART = 'PIWIK_CART';
+    const UUID = 'PIWIK_UUID';
+    const SITE_SEARCH = 'PIWIK_SITE_SEARCH';
+    const TAPID = 'PIWIK_TAPID';
+    const CART_PRODUCTS = 'PIWIK_CART_PRODUCTS';
+    const CART_TOTAL = 'PIWIK_CART_TOTAL';
+    const PRODUCTS = 'PIWIK_PRODUCTS';
     /** @var bool $isOrder */
     private static $isOrder = false;
     /** @var bool $matomoSite */
@@ -729,6 +735,7 @@ class PiwikAnalyticsJs extends Module
         $helper->fields_value = $this->getFormFields();
         $this->context->smarty->assign([
             'psversion'        => _PS_VERSION_,
+            'tbversion'        => _TB_VERSION_,
             /* piwik_site_lookup */
             'psl_CPREFIX'      => 'PIWIK',
             'psl_currentIndex' => $helper->currentIndex,
@@ -777,7 +784,7 @@ class PiwikAnalyticsJs extends Module
             PKHelper::debugLogger("__pkapicall():\n\t- Call PKHelper::".$apiMethod);
             $result = call_user_func_array(['PKHelper', $apiMethod], $order);
             if ($result === false) {
-                $lastError = "";
+                $lastError = '';
                 if (!empty(PKHelper::$errors)) {
                     $lastError = "\n".PKHelper::$error;
                 }
@@ -860,9 +867,6 @@ class PiwikAnalyticsJs extends Module
                 $tmp = (int) ($tmp * 60); //* convert to seconds
                 Configuration::updateValue(static::SESSION_TIMEOUT, $tmp);
             }
-            /*
-             * @todo VALIDATE!!!, YES VALIDATE!!! thank you ...
-             */
             if (Tools::getIsset(static::USE_PROXY)) {
                 Configuration::updateValue(static::USE_PROXY, Tools::getValue(static::USE_PROXY));
             }
@@ -995,6 +999,14 @@ class PiwikAnalyticsJs extends Module
         return $this->hookFooter($params);
     }
 
+    /**
+     * @param $params
+     *
+     * @return string
+     * @throws PrestaShopDatabaseException
+     * @throws PrestaShopException
+     * @throws SmartyException
+     */
     public function hookFooter($params)
     {
         if ((int) Configuration::get(static::SITEID) <= 0) {
@@ -1005,20 +1017,7 @@ class PiwikAnalyticsJs extends Module
             return "";
         }
 
-
-        if (_PS_VERSION_ < '1.5.6') {
-            /* get page name the LAME way :) */
-            if (method_exists($this->context->smarty, 'get_template_vars')) { /* smarty_2 */
-                $page_name = $this->context->smarty->get_template_vars('page_name');
-            } else {
-                if (method_exists($this->context->smarty, 'getTemplateVars')) {/* smarty */
-                    $page_name = $this->context->smarty->getTemplateVars('page_name');
-                } else {
-                    $page_name = "";
-                }
-            }
-        }
-        $this->__setConfigDefault();
+        $this->setDefaultConfig();
         $this->context->smarty->assign(static::ORDER, false);
 
         /* cart tracking */
@@ -1083,20 +1082,17 @@ class PiwikAnalyticsJs extends Module
             $is404 = true;
         }
 
-        $this->context->smarty->assign(["PK404" => $is404]);
+        $this->context->smarty->assign(['PK404' => $is404]);
 
-        if (_PS_VERSION_ < '1.5.6') {
-            $this->_hookFooterPS14($params, $page_name);
-        } else {
-            if (_PS_VERSION_ >= '1.5') {
-                $this->_hookFooter($params);
-            }
-        }
+        $this->_hookFooter($params);
 
         return $this->display(__FILE__, 'views/templates/hook/jstracking.tpl');
     }
 
-    private function __setConfigDefault()
+    /**
+     * @throws PrestaShopException
+     */
+    protected function setDefaultConfig()
     {
 
         $this->context->smarty->assign(static::USE_PROXY, (bool) Configuration::get(static::USE_PROXY));
@@ -1152,12 +1148,8 @@ class PiwikAnalyticsJs extends Module
             $this->context->smarty->assign(static::DNT, "_paq.push([\"setDoNotTrack\", true]);");
         }
 
-        if (_PS_VERSION_ < '1.5' && $this->context->cookie->isLogged()) {
-            $this->context->smarty->assign(static::UUID, $this->context->cookie->email);
-        } else {
-            if ($this->context->customer->isLogged()) {
-                $this->context->smarty->assign(static::UUID, $this->context->customer->email);
-            }
+        if ($this->context->customer->isLogged()) {
+            $this->context->smarty->assign(static::UUID, $this->context->customer->email);
         }
     }
 
@@ -1310,7 +1302,7 @@ class PiwikAnalyticsJs extends Module
         $order = $params['objOrder'];
         if (Validate::isLoadedObject($order)) {
 
-            $this->__setConfigDefault();
+            $this->setDefaultConfig();
 
             $this->context->smarty->assign(static::ORDER, true);
             $this->context->smarty->assign(static::CART, false);
@@ -1406,11 +1398,14 @@ class PiwikAnalyticsJs extends Module
      * Search action
      *
      * @param array $param
+     *
+     * @return string
+     * @throws PrestaShopException
      */
     public function hookactionSearch($param)
     {
         if ((int) Configuration::get(static::SITEID) <= 0) {
-            return "";
+            return '';
         }
         $param['total'] = intval($param['total']);
         /* if multi pages in search add page number of current if set! */
@@ -1423,12 +1418,17 @@ class PiwikAnalyticsJs extends Module
         $this->context->smarty->assign([
             static::SITE_SEARCH => "_paq.push(['trackSiteSearch',\"{$expr}{$page}\",false,{$param['total']}]);",
         ]);
+
+        return '';
     }
 
     /**
      * Install the module
      *
      * @return boolean false on install error
+     * @throws Adapter_Exception
+     * @throws PrestaShopDatabaseException
+     * @throws PrestaShopException
      */
     public function install()
     {
@@ -1480,7 +1480,7 @@ class PiwikAnalyticsJs extends Module
                 ."<br/>"
                 .(($AdminParentStats instanceof Tab || $AdminParentStats instanceof TabCore) ? "\$AdminParentStats->class_name: ".$AdminParentStats->class_name : "\$AdminParentStats->class_name: ?0?")
                 ."<br/>"
-                ."Prestashop version: "._PS_VERSION_
+                ."thirty bees version: "._TB_VERSION_
                 ."<br/>"
                 ."PHP version: ".PHP_VERSION
             );
@@ -1544,6 +1544,9 @@ class PiwikAnalyticsJs extends Module
      * Uninstall the module
      *
      * @return boolean false on uninstall error
+     *
+     * @throws PrestaShopDatabaseException
+     * @throws PrestaShopException
      */
     public function uninstall()
     {
@@ -1551,22 +1554,9 @@ class PiwikAnalyticsJs extends Module
             foreach ($this->getConfigFields(false) as $key => $value) {
                 Configuration::deleteByName($key);
             }
-            try {
-                if (method_exists('Tab', 'getInstanceFromClassName')) {
-                    $AdminParentStats = Tab::getInstanceFromClassName('PiwikAnalytics');
-                } else {
-                    if (method_exists('Tab', 'getIdFromClassName')) {
-                        $tmpId = Tab::getIdFromClassName('PiwikAnalytics');
-                        if ($tmpId != null && $tmpId > 0) {
-                            $AdminParentStats = new Tab($tmpId);
-                        }
-                    }
-                }
-                if (isset($AdminParentStats) && ($AdminParentStats instanceof Tab || $AdminParentStats instanceof TabCore)) {
-                    $AdminParentStats->delete();
-                }
-            } catch (Exception $ex) {
-
+            $adminParentStats = Tab::getInstanceFromClassName('PiwikAnalytics');
+            if (Validate::isLoadedObject($adminParentStats)) {
+                $adminParentStats->delete();
             }
             Configuration::deleteByName(static::TAPID);
 
