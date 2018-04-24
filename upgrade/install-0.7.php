@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright (C) 2017 thirty bees
+ * Copyright (C) 2017-2018 thirty bees
  * Copyright (C) 2014 Christian Jensen
  *
  * This file is part of PiwikAnalyticsJS for prestashop.
@@ -25,11 +25,11 @@
  */
 
 /**
- *
- * @param piwikanalyticsjs $module
  * @return boolean
+ *
+ * @throws PrestaShopException
  */
-function upgrade_module_0_7($module) {
+function upgrade_module_0_7() {
     Configuration::updateValue("PIWIK_DEFAULT_CURRENCY", 'EUR');
     Configuration::updateValue("PIWIK_RCOOKIE_TIMEOUT", (int) (262974 * 60));
     Configuration::updateValue("PIWIK_USRNAME", '');

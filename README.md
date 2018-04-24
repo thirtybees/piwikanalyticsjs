@@ -1,2 +1,2 @@
-# piwik
-Piwik module for thirty bees
+# Matomo/Piwik
+Matomo (Piwik) module for thirty bees

@@ -16,14 +16,13 @@
  * You should have received a copy of the GNU General Public License
  * along with PiwikAnalyticsJS for prestashop.  If not, see <http://www.gnu.org/licenses/>.
  *
- *
  * @link http://cmjnisse.github.io/piwikanalyticsjs-prestashop
  * @license http://www.gnu.org/licenses/gpl-3.0.html GPL v3 or later
 *}
 
 <script type="text/javascript">
   (function () {
-    var u = (("https:" == document.location.protocol) ? "https://{$PIWIK_HOST|escape:'javascript'}" : "http://{$PIWIK_HOST|escape:'javascript'}");
+    var u = '{Tools::getShopProtocol()|escape:'javascript'}{$PIWIK_HOST|escape:'javascript'}';
     var _paq = _paq || [];
     {if isset($PIWIK_DNT)}{$PIWIK_DNT}{/if}
     _paq.push(["setSiteId",{$PIWIK_SITEID|escape:'javascript'}]);

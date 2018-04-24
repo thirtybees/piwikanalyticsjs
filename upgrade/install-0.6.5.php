@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright (C) 2017 thirty bees
+ * Copyright (C) 2017-2018 thirty bees
  * Copyright (C) 2014 Christian Jensen
  *
  * This file is part of PiwikAnalyticsJS for prestashop.
@@ -26,8 +26,10 @@
 
 /**
  *
- * @param piwikanalyticsjs $module
+ * @param PiwikAnalyticsJs $module
+ *
  * @return boolean
+ * @throws PrestaShopException
  */
 function upgrade_module_0_6_5($module) {
     Configuration::updateValue('PIWIK_COOKIE_DOMAIN', '*.' . str_replace('www.', '', Tools::getShopDomain()));

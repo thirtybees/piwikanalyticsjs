@@ -1,13 +1,6 @@
 <?php
-
-if (!defined('_TB_VERSION_'))
-    exit;
-
-if (class_exists('PKHelper', FALSE))
-    return;
-
 /**
- * Copyright (C) 2017 thirty bees
+ * Copyright (C) 2017-2018 thirty bees
  * Copyright (C) 2014 Christian Jensen
  *
  * This file is part of PiwikAnalyticsJS for prestashop.
@@ -31,38 +24,78 @@ if (class_exists('PKHelper', FALSE))
  * @license http://www.gnu.org/licenses/gpl-3.0.html GPL v3 or later
  */
 
-class PKHelper {
+if (!defined('_TB_VERSION_')) {
+    exit;
+}
 
-    public static $acp = array(
-        'updatePiwikSite' => array(
-            'required' => array('idSite'),
-            'optional' => array('siteName', 'urls', 'ecommerce', 'siteSearch', 'searchKeywordParameters', 'searchCategoryParameters', 'excludedIps', 'excludedQueryParameters', 'timezone', 'currency', 'group', 'startDate', 'excludedUserAgents', 'keepURLFragments', 'type'),
-            'order' => array('idSite', 'siteName', 'urls', 'ecommerce', 'siteSearch', 'searchKeywordParameters', 'searchCategoryParameters', 'excludedIps', 'excludedQueryParameters', 'timezone', 'currency', 'group', 'startDate', 'excludedUserAgents', 'keepURLFragments', 'type'),
-        ),
-        'getPiwikSite' => array('required' => array('idSite'), 'optional' => array(''), 'order' => array('idSite'),),
-        'getPiwikSite2' => array('required' => array('idSite'), 'optional' => array(''), 'order' => array('idSite'),),
-        'getSitesGroups' => array('required' => array(), 'optional' => array(), 'order' => array(),),
-        'getSitesWithViewAccess' => array('required' => array(), 'optional' => array(), 'order' => array(),),
-        'getSitesWithAdminAccess' => array('required' => array(), 'optional' => array('fetchAliasUrls'), 'order' => array('fetchAliasUrls'),),
-        'getTokenAuth' => array(
-            'required' => array('userLogin'),
-            'optional' => array('password', 'md5Password'),
-            'order' => array('userLogin', 'password', 'md5Password'),
-        ),
-    );
+/**
+ * Class PKHelper
+ */
+class PKHelper {
+    /** @var array  */
+    public static $acp = [
+        'updatePiwikSite' => [
+            'required' => ['idSite'],
+            'optional' => [
+                'siteName',
+                'urls',
+                'ecommerce',
+                'siteSearch',
+                'searchKeywordParameters',
+                'searchCategoryParameters',
+                'excludedIps',
+                'excludedQueryParameters',
+                'timezone',
+                'currency',
+                'group',
+                'startDate',
+                'excludedUserAgents',
+                'keepURLFragments',
+                'type'
+            ],
+            'order' => [
+                'idSite',
+                'siteName',
+                'urls',
+                'ecommerce',
+                'siteSearch',
+                'searchKeywordParameters',
+                'searchCategoryParameters',
+                'excludedIps',
+                'excludedQueryParameters',
+                'timezone',
+                'currency',
+                'group',
+                'startDate',
+                'excludedUserAgents',
+                'keepURLFragments',
+                'type'
+            ],
+        ],
+        'getPiwikSite' => ['required' => ['idSite'], 'optional' => [''], 'order' => ['idSite'],],
+        'getPiwikSite2' => ['required' => ['idSite'], 'optional' => [''], 'order' => ['idSite'],],
+        'getSitesGroups' => ['required' => [], 'optional' => [], 'order' => [],],
+        'getSitesWithViewAccess' => ['required' => [], 'optional' => [], 'order' => [],],
+        'getSitesWithAdminAccess' => ['required' => [], 'optional' => ['fetchAliasUrls'], 'order' => ['fetchAliasUrls'],],
+        'getTokenAuth' => [
+            'required' => ['userLogin'],
+            'optional' => ['password', 'md5Password'],
+            'order' => ['userLogin', 'password', 'md5Password'],
+        ],
+    ];
 
     /**
      * all errors isset by class PKHelper
      * @var string[] 
      */
-    public static $errors = array();
+    public static $errors = [];
 
     /**
      * last isset error by class PKHelper
      * @var string
      */
     public static $error = "";
-    protected static $_cachedResults = array();
+    protected static $_cachedResults = [];
 
     /**
      * for Prestashop 1.4 translation
@@ -121,24 +154,26 @@ class PKHelper {
     }
 
     /**
-     * 
-     * @param type $idSite
-     * @param type $siteName
+     *
+     * @param type  $idSite
+     * @param type  $siteName
      * @param array $urls
-     * @param type $ecommerce
-     * @param type $siteSearch
-     * @param type $searchKeywordParameters
-     * @param type $searchCategoryParameters
-     * @param type $excludedIps
-     * @param type $excludedQueryParameters
-     * @param type $timezone
-     * @param type $currency
-     * @param type $group
-     * @param type $startDate
-     * @param type $excludedUserAgents
-     * @param type $keepURLFragments
-     * @param type $type
+     * @param type  $ecommerce
+     * @param type  $siteSearch
+     * @param type  $searchKeywordParameters
+     * @param type  $searchCategoryParameters
+     * @param type  $excludedIps
+     * @param type  $excludedQueryParameters
+     * @param type  $timezone
+     * @param type  $currency
+     * @param type  $group
+     * @param type  $startDate
+     * @param type  $excludedUserAgents
+     * @param type  $keepURLFragments
+     * @param type  $type
+     *
      * @return boolean
+     * @throws PrestaShopException
      */
     public static function updatePiwikSite($idSite, $siteName = NULL, $urls = NULL, $ecommerce = NULL, $siteSearch = NULL, $searchKeywordParameters = NULL, $searchCategoryParameters = NULL, $excludedIps = NULL, $excludedQueryParameters = NULL, $timezone = NULL, $currency = NULL, $group = NULL, $startDate = NULL, $excludedUserAgents = NULL, $keepURLFragments = NULL, $type = NULL) {
         if (!self::baseTest() || ($idSite <= 0))
@@ -245,10 +280,10 @@ class PKHelper {
      * @return array
      */
     public static function getPiwikImageTrackingCode() {
-        $ret = array(
+        $ret = [
             'default' => self::l('I need Site ID and Auth Token before i can get your image tracking code'),
             'proxy' => self::l('I need Site ID and Auth Token before i can get your image tracking code')
-        );
+        ];
 
         $idSite = (int) Configuration::get(PKHelper::CPREFIX . 'SITEID');
         if (!self::baseTest() || ($idSite <= 0))
@@ -341,7 +376,7 @@ class PKHelper {
      */
     public static function getTimezonesList() {
         if (!self::baseTest())
-            return array();
+            return [];
         $url = self::getBaseURL();
         $url .= "&method=SitesManager.getTimezonesList&format=JSON";
         $md5Url = md5($url);
@@ -349,14 +384,14 @@ class PKHelper {
             if ($result = self::getAsJsonDecoded($url))
                 self::$_cachedResults[$md5Url] = $result;
             else
-                self::$_cachedResults[$md5Url] = array();
+                self::$_cachedResults[$md5Url] = [];
         }
         return self::$_cachedResults[$md5Url];
     }
 
     public static function getSitesWithViewAccess() {
         if (!self::baseTest())
-            return array();
+            return [];
         $url = self::getBaseURL();
         $url .= "&method=SitesManager.getSitesWithViewAccess&format=JSON";
         $md5Url = md5($url);
@@ -364,7 +399,7 @@ class PKHelper {
             if ($result = self::getAsJsonDecoded($url))
                 self::$_cachedResults[$md5Url] = $result;
             else
-                self::$_cachedResults[$md5Url] = array();
+                self::$_cachedResults[$md5Url] = [];
         }
         return self::$_cachedResults[$md5Url];
     }
@@ -386,7 +421,7 @@ class PKHelper {
      */
     public static function getSitesWithAdminAccess($fetchAliasUrls = false) {
         if (!self::baseTest())
-            return array();
+            return [];
         $url = self::getBaseURL();
         $url .= "&method=SitesManager.getSitesWithAdminAccess&format=JSON" . ($fetchAliasUrls ? '&fetchAliasUrls=1' : '');
         $md5Url = md5($url);
@@ -394,7 +429,7 @@ class PKHelper {
             if ($result = self::getAsJsonDecoded($url))
                 self::$_cachedResults[$md5Url] = $result;
             else
-                self::$_cachedResults[$md5Url] = array();
+                self::$_cachedResults[$md5Url] = [];
         }
         return self::$_cachedResults[$md5Url];
     }
@@ -405,7 +440,7 @@ class PKHelper {
      */
     public static function getMyPiwikSiteIds() {
         if (!self::baseTest())
-            return array();
+            return [];
         $url = self::getBaseURL();
         $url .= "&method=SitesManager.getSitesIdWithAdminAccess&format=JSON";
         $md5Url = md5($url);
@@ -413,7 +448,7 @@ class PKHelper {
             if ($result = self::getAsJsonDecoded($url))
                 self::$_cachedResults[$md5Url] = $result;
             else
-                self::$_cachedResults[$md5Url] = array();
+                self::$_cachedResults[$md5Url] = [];
         }
         return self::$_cachedResults[$md5Url];
     }
@@ -484,7 +519,7 @@ class PKHelper {
         return FALSE;
     }
 
-    public static function get_http($url, $headers = array()) {
+    public static function get_http($url, $headers = []) {
         static $_error2 = FALSE;
         PKHelper::DebugLogger('START: PKHelper::get_http(' . $url . ',' . print_r($headers, true) . ')');
         // class: Context is not loaded when using piwik.php proxy on prestashop 1.4
@@ -510,14 +545,14 @@ class PKHelper {
             if ((!empty($httpauth_usr) && !is_null($httpauth_usr) && $httpauth_usr !== false) && (!empty($httpauth_pwd) && !is_null($httpauth_pwd) && $httpauth_pwd !== false)) {
                 $httpauth = "Authorization: Basic " . base64_encode("$httpauth_usr:$httpauth_pwd") . "\r\n";
             }
-            $options = array(
-                'http' => array(
+            $options = [
+                'http' => [
                     'user_agent' => (isset($_SERVER['HTTP_USER_AGENT']) ? $_SERVER['HTTP_USER_AGENT'] : PKHelper::FAKEUSERAGENT),
                     'method' => "GET",
                     'timeout' => $timeout,
                     'header' => (!empty($headers) ? implode('', $headers) : "Accept-language: {$lng}\r\n") . $httpauth
-                )
-            );
+                ]
+            ];
             $context = stream_context_create($options);
             PKHelper::DebugLogger('Calling: '. $url . (!empty($httpauth) ? "\n\t- With Http auth":""));
             $result = @file_get_contents($url, false, $context);
@@ -555,7 +590,7 @@ class PKHelper {
                 //curl_setopt($ch, CURLOPT_HEADER, 1);
                 (!empty($headers) ?
                                 curl_setopt($ch, CURLOPT_HTTPHEADER, $headers) :
-                                curl_setopt($ch, CURLOPT_HTTPHEADER, array("Accept-language: {$lng}\r\n"))
+                                curl_setopt($ch, CURLOPT_HTTPHEADER, ["Accept-language: {$lng}\r\n"])
                         );
                 PKHelper::DebugLogger("\t: curl_setopt(\$ch, CURLOPT_HTTPHEADER, array(...))");
                 curl_setopt($ch, CURLOPT_USERAGENT, (isset($_SERVER['HTTP_USER_AGENT']) ? $_SERVER['HTTP_USER_AGENT'] : PKHelper::FAKEUSERAGENT));

@@ -2,7 +2,7 @@
  * 2007-2016 PrestaShop
  *
  * thirty bees is an extension to the PrestaShop e-commerce software developed by PrestaShop SA
- * Copyright (C) 2017 thirty bees
+ * Copyright (C) 2017-2018 thirty bees
  *
  * NOTICE OF LICENSE
  *
@@ -16,7 +16,7 @@
  *
  * @author    thirty bees <modules@thirtybees.com>
  * @author    PrestaShop SA <contact@prestashop.com>
- * @copyright 2017 thirty bees
+ * @copyright 2017-2018 thirty bees
  * @copyright 2007-2016 PrestaShop SA
  * @license   http://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  * PrestaShop is an internationally registered trademark & property of PrestaShop SA
@@ -47,7 +47,7 @@
         var excludedUserAgents = $('#PKAdminExcludedUserAgents').val();
         var keepURLFragments = $('input[name=PKAdminKeepURLFragments]:checked').val();
         /*var type = $('#PKAdminSiteType').val();*/
-        $.ajax( {
+        $.ajax({
             type: 'POST',
             url: '{$psm_currentIndex}&token={$psm_token}',
             dataType: 'json',
@@ -84,8 +84,7 @@
     
         return false;
     }
-    {if version_compare($psversion, '1.5.4.999','>')}
-    function hideLoadingStuff() { 
+    function hideLoadingStuff() {
         $('#ajax_running').hide('fast'); 
         clearTimeout(ajax_running_timeout); 
         $.fancybox.helpers.overlay.close(); 
@@ -96,10 +95,6 @@
         $.fancybox.helpers.overlay.open({ parent: $('body') });
         $.fancybox.showLoading();
     }
-    {else}
-    function showLoadingStuff() { $.fancybox.showActivity(); };
-    function hideLoadingStuff() { $.fancybox.hideActivity(); };
-    {/if}
     function ChangePKSiteEdit(id){
         $.ajax( { 
             type: 'POST',

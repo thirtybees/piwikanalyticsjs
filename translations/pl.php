@@ -1,7 +1,7 @@
 <?php
 
 global $_MODULE;
-$_MODULE = array();
+$_MODULE = [];
 $_MODULE['<{piwikanalyticsjs}prestashop>piwikanalyticsjs_74c5534d3738e06d545304d1bcd4a318'] = 'Piwik nie jest gotowy do działania, musisz podać token autoryzujący';
 $_MODULE['<{piwikanalyticsjs}prestashop>piwikanalyticsjs_5d824862496e07f62a68c1f083e37cf2'] = 'Nie ustawiłeś identyfikatora strony w Piwiku';
 $_MODULE['<{piwikanalyticsjs}prestashop>piwikanalyticsjs_3fa892cea56d3519bb26ab1a230f75b4'] = 'Piwik nie jest gotowy do działania, musisz podać URL serwera Piwika';

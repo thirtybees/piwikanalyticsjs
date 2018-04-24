@@ -1,14 +1,9 @@
 <?php
-
-if (!defined('_TB_VERSION_'))
-    exit;
-
-
 /**
  * 2007-2016 PrestaShop
  *
  * thirty bees is an extension to the PrestaShop e-commerce software developed by PrestaShop SA
- * Copyright (C) 2017 thirty bees
+ * Copyright (C) 2017-2018 thirty bees
  *
  * NOTICE OF LICENSE
  *
@@ -22,35 +17,50 @@ if (!defined('_TB_VERSION_'))
  *
  * @author    thirty bees <modules@thirtybees.com>
  * @author    PrestaShop SA <contact@prestashop.com>
- * @copyright 2017 thirty bees
+ * @copyright 2017-2018 thirty bees
  * @copyright 2007-2016 PrestaShop SA
  * @license   http://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  * PrestaShop is an internationally registered trademark & property of PrestaShop SA
  */
-class PiwikAnalyticsController extends ModuleAdminController {
 
-    public function init() {
+if (!defined('_TB_VERSION_')) {
+    exit;
+}
+
+/**
+ * Class PiwikAnalyticsController
+ */
+class PiwikAnalyticsController extends ModuleAdminController
+{
+    /**
+     * Initialize the controller
+     *
+     * @throws PrestaShopDatabaseException
+     * @throws PrestaShopException
+     */
+    public function init()
+    {
         parent::init();
 
         $this->bootstrap = true;
         $this->action = 'view';
         $this->display = 'view';
         $this->show_page_header_toolbar = true;
-        $this->tpl_folder = _PS_MODULE_DIR_ . $this->module->name . '/views/templates/admin/PiwikAnalytics/';
     }
 
-    public function initContent() {
-        if ($this->ajax)
+    /**
+     * @throws PrestaShopException
+     */
+    public function initContent()
+    {
+        if ($this->ajax) {
             return;
+        }
 
         $this->initTabModuleList();
         $this->addToolBarModulesListButton();
         $this->toolbar_title = $this->l('Stats', 'PiwikAnalytics');
-
-        if (_PS_VERSION_ < '1.6')
-            $this->bootstrap = false;
-        else
-            $this->initPageHeaderToolbar();
+        $this->initPageHeaderToolbar();
         $http = ((bool) Configuration::get('PIWIK_CRHTTPS') ? 'https://' : 'http://');
         $PIWIK_HOST = Configuration::get('PIWIK_HOST');
         $PIWIK_SITEID = (int) Configuration::get('PIWIK_SITEID');
@@ -61,17 +71,17 @@ class PiwikAnalyticsController extends ModuleAdminController {
         // PKHelper::CPREFIX . 'USRPASSWD'
         $passwd = Configuration::get('PIWIK_USRPASSWD');
         if ((!empty($user) && $user !== FALSE) && (!empty($passwd) && $passwd !== FALSE)) {
-            $this->page_header_toolbar_btn['stats'] = array(
-                'href' => $http . $PIWIK_HOST . 'index.php?module=Login&action=logme&login=' . $user . '&password=' . md5($passwd) . '&idSite=' . $PIWIK_SITEID,
-                'desc' => $this->l('Piwik'),
-                'target' => true
-            );
+            $this->page_header_toolbar_btn['stats'] = [
+                'href'   => $http.$PIWIK_HOST.'index.php?module=Login&action=logme&login='.$user.'&password='.md5($passwd).'&idSite='.$PIWIK_SITEID,
+                'desc'   => $this->l('Piwik'),
+                'target' => true,
+            ];
         } else {
-            $this->page_header_toolbar_btn['stats'] = array(
-                'href' => $http . $PIWIK_HOST . 'index.php',
-                'desc' => $this->l('Piwik'),
-                'target' => true
-            );
+            $this->page_header_toolbar_btn['stats'] = [
+                'href'   => $http.$PIWIK_HOST.'index.php',
+                'desc'   => $this->l('Piwik'),
+                'target' => true,
+            ];
         }
         if ($this->display == 'view') {
 
@@ -82,8 +92,8 @@ class PiwikAnalyticsController extends ModuleAdminController {
 
             $PIWIK_TOKEN_AUTH = Configuration::get('PIWIK_TOKEN_AUTH');
             if ((empty($PIWIK_HOST) || $PIWIK_HOST === FALSE) ||
-                    ($PIWIK_SITEID <= 0 || $PIWIK_SITEID === FALSE) ||
-                    (empty($PIWIK_TOKEN_AUTH) || $PIWIK_TOKEN_AUTH === FALSE)) {
+                ($PIWIK_SITEID <= 0 || $PIWIK_SITEID === FALSE) ||
+                (empty($PIWIK_TOKEN_AUTH) || $PIWIK_TOKEN_AUTH === FALSE)) {
 
                 $this->content .= "<h3 style=\"padding: 90px;\">{$this->l("You need to set 'Piwik host url', 'Piwik token auth' and 'Piwik site id', and save them before the dashboard can be shown here")}</h3>";
             } else {
@@ -97,11 +107,7 @@ class PiwikAnalyticsController extends ModuleAdminController {
   }
 </script>   
 EOF;
-                $lng = new LanguageCore($this->context->cookie->id_lang);
-
-                if (_PS_VERSION_ < '1.6')
-                    $this->content .= '<h3><a target="_blank" href="' . $this->page_header_toolbar_btn['stats']['href'] . '">' . $this->page_header_toolbar_btn['stats']['desc'] . '</a> | <a target="_blank" href="https://github.com/cmjnisse/piwikanalyticsjs-prestashop/wiki">' . $this->l('Help') . '</a></h3>';
-
+                $lng = new Language($this->context->cookie->id_lang);
                 $DREPDATE = Configuration::get('PIWIK_DREPDATE');
                 if ($DREPDATE !== FALSE && (strpos($DREPDATE, '|') !== FALSE)) {
                     list($period, $date) = explode('|', $DREPDATE);
@@ -110,28 +116,28 @@ EOF;
                     $date = "today";
                 }
                 $this->content .= ''
-                        . '<iframe id="WidgetizeiframeDashboard"  onload="WidgetizeiframeDashboardLoaded();" '
-                        . 'src="' . $http
-                        . $PIWIK_HOST . 'index.php'
-                        . '?module=Widgetize'
-                        . '&action=iframe'
-                        . '&moduleToWidgetize=Dashboard'
-                        . '&actionToWidgetize=index'
-                        . '&idSite=' . $PIWIK_SITEID
-                        . '&period=' . $period
-                        . '&token_auth=' . $PIWIK_TOKEN_AUTH
-                        . '&language=' . $lng->iso_code
-                        . '&date=' . $date
-                        . '" frameborder="0" marginheight="0" marginwidth="0" width="100%" height="550px"></iframe>';
+                    .'<iframe id="WidgetizeiframeDashboard"  onload="WidgetizeiframeDashboardLoaded();" '
+                    .'src="'.$http
+                    .$PIWIK_HOST.'index.php'
+                    .'?module=Widgetize'
+                    .'&action=iframe'
+                    .'&moduleToWidgetize=Dashboard'
+                    .'&actionToWidgetize=index'
+                    .'&idSite='.$PIWIK_SITEID
+                    .'&period='.$period
+                    .'&token_auth='.$PIWIK_TOKEN_AUTH
+                    .'&language='.$lng->iso_code
+                    .'&date='.$date
+                    .'" frameborder="0" marginheight="0" marginwidth="0" width="100%" height="550px"></iframe>';
             }
         }
 
-        $this->context->smarty->assign(array(
-            'content' => $this->content,
-            'show_page_header_toolbar' => (isset($this->show_page_header_toolbar) ? $this->show_page_header_toolbar : ''),
+        $this->context->smarty->assign([
+            'content'                   => $this->content,
+            'show_page_header_toolbar'  => (isset($this->show_page_header_toolbar) ? $this->show_page_header_toolbar : ''),
             'page_header_toolbar_title' => (isset($this->page_header_toolbar_title) ? $this->page_header_toolbar_title : ''),
-            'page_header_toolbar_btn' => (isset($this->page_header_toolbar_btn) ? $this->page_header_toolbar_btn : ''),
-        ));
+            'page_header_toolbar_btn'   => (isset($this->page_header_toolbar_btn) ? $this->page_header_toolbar_btn : ''),
+        ]);
     }
 
 }

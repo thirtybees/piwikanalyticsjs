@@ -1,7 +1,7 @@
 <?php
 
 global $_MODULE;
-$_MODULE = array();
+$_MODULE = [];
 $_MODULE['<{piwikanalyticsjs}prestashop>piwikanalyticsjs_4573d4d352abe43c990ab2ecb8cb2266'] = 'er ikke klar til at blive brugt du skal konfigurere auth token';
 $_MODULE['<{piwikanalyticsjs}prestashop>piwikanalyticsjs_8a82c2ec8cb1de32dd0941895c808cfa'] = 'Du har endnu ikke sat Piwik site ID';
 $_MODULE['<{piwikanalyticsjs}prestashop>piwikanalyticsjs_4e4d63237c63f7d937b7b29acdedc231'] = 'er ikke klar til at blive brugt du skal konfigurere Piwik server url';
