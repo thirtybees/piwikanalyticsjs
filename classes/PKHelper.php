@@ -144,8 +144,9 @@ class PKHelper
      */
     public static function debugLogger($message)
     {
-        if (PKHelper::DEBUGLOG != 1)
+        if (PKHelper::DEBUGLOG != 1) {
             return;
+        }
         if (static::$_debug_logger == null) {
             static::$_debug_logger = new FileLogger(FileLogger::DEBUG);
             static::$_debug_logger->setFilename(_PS_ROOT_DIR_.'/log/'.date('Ymd').'_piwik.debug.log');
@@ -178,51 +179,67 @@ class PKHelper
      */
     public static function updatePiwikSite($idSite, $siteName = null, $urls = null, $ecommerce = null, $siteSearch = null, $searchKeywordParameters = null, $searchCategoryParameters = null, $excludedIps = null, $excludedQueryParameters = null, $timezone = null, $currency = null, $group = null, $startDate = null, $excludedUserAgents = null, $keepURLFragments = null, $type = null)
     {
-        if (!static::baseTest() || ($idSite <= 0))
+        if (!static::baseTest() || ($idSite <= 0)) {
             return false;
+        }
         $url = static::getBaseURL($idSite);
         $url .= "&method=SitesManager.updateSite&format=JSON";
-        if ($siteName !== null)
+        if ($siteName !== null) {
             $url .= "&siteName=".urlencode($siteName);
+        }
 
         if ($urls !== null) {
             foreach (explode(',', $urls) as $value) {
                 $url .= "&urls[]=".urlencode(trim($value));
             }
         }
-        if ($ecommerce !== null)
+        if ($ecommerce !== null) {
             $url .= "&ecommerce=".urlencode($ecommerce);
-        if ($siteSearch !== null)
+        }
+        if ($siteSearch !== null) {
             $url .= "&siteSearch=".urlencode($siteSearch);
-        if ($searchKeywordParameters !== null)
+        }
+        if ($searchKeywordParameters !== null) {
             $url .= "&searchKeywordParameters=".urlencode($searchKeywordParameters);
-        if ($searchCategoryParameters !== null)
+        }
+        if ($searchCategoryParameters !== null) {
             $url .= "&searchCategoryParameters=".urlencode($searchCategoryParameters);
-        if ($excludedIps !== null)
+        }
+        if ($excludedIps !== null) {
             $url .= "&excludedIps=".urlencode($excludedIps);
-        if ($excludedQueryParameters !== null)
+        }
+        if ($excludedQueryParameters !== null) {
             $url .= "&excludedQueryParameters=".urlencode($excludedQueryParameters);
-        if ($timezone !== null)
+        }
+        if ($timezone !== null) {
             $url .= "&timezone=".urlencode($timezone);
-        if ($currency !== null)
+        }
+        if ($currency !== null) {
             $url .= "&currency=".urlencode($currency);
-        if ($group !== null)
+        }
+        if ($group !== null) {
             $url .= "&group=".urlencode($group);
-        if ($startDate !== null)
+        }
+        if ($startDate !== null) {
             $url .= "&startDate=".urlencode($startDate);
-        if ($excludedUserAgents !== null)
+        }
+        if ($excludedUserAgents !== null) {
             $url .= "&excludedUserAgents=".urlencode($excludedUserAgents);
-        if ($keepURLFragments !== null)
+        }
+        if ($keepURLFragments !== null) {
             $url .= "&keepURLFragments=".urlencode($keepURLFragments);
-        if ($type !== null)
+        }
+        if ($type !== null) {
             $url .= "&type=".urlencode($type);
+        }
         if ($result = static::getAsJsonDecoded($url)) {
             $url2 = static::getBaseURL($idSite)."&method=SitesManager.getSiteFromId&format=JSON";
             unset(static::$_cachedResults[md5($url2)]); // Clear cache for updated site
 
             return ($result->result == 'success' && $result->message == 'ok' ? true : ($result->result != 'success' ? $result->message : false));
-        } else
+        } else {
             return false;
+        }
     }
 
     /**
@@ -277,8 +294,9 @@ class PKHelper
             }
 
             return isset($result->value) ? $result->value : false;
-        } else
+        } else {
             return false;
+        }
     }
 
     /**
@@ -295,25 +313,28 @@ class PKHelper
         ];
 
         $idSite = (int) Configuration::get('PIWIK'.'SITEID');
-        if (!static::baseTest() || ($idSite <= 0))
+        if (!static::baseTest() || ($idSite <= 0)) {
             return $ret;
+        }
 
         $url = static::getBaseURL();
         $url .= "&method=SitesManager.getImageTrackingCode&format=JSON&actionName=NoJavaScript";
         $url .= "&piwikUrl=".urlencode(rtrim(Configuration::get('PIWIK'.'HOST'), '/'));
         $md5Url = md5($url);
         if (!isset(static::$_cachedResults[$md5Url])) {
-            if ($result = static::getAsJsonDecoded($url))
+            if ($result = static::getAsJsonDecoded($url)) {
                 static::$_cachedResults[$md5Url] = $result;
-            else
+            } else {
                 static::$_cachedResults[$md5Url] = false;
+            }
         }
         if (static::$_cachedResults[$md5Url] !== false) {
             $ret['default'] = htmlentities('<noscript>'.static::$_cachedResults[$md5Url]->value.'</noscript>');
-            if ((bool) Configuration::get('PS_REWRITING_SETTINGS'))
+            if ((bool) Configuration::get('PS_REWRITING_SETTINGS')) {
                 $ret['proxy'] = str_replace(Configuration::get('PIWIK'.'HOST').'piwik.php', Configuration::get('PIWIK'.'PROXY_SCRIPT'), $ret['default']);
-            else
+            } else {
                 $ret['proxy'] = str_replace(Configuration::get('PIWIK'.'HOST').'piwik.php?', Configuration::get('PIWIK'.'PROXY_SCRIPT').'&', $ret['default']);
+            }
         }
 
         return $ret;
@@ -328,19 +349,22 @@ class PKHelper
      */
     public static function getPiwikSite($idSite = 0)
     {
-        if ($idSite == 0)
+        if ($idSite == 0) {
             $idSite = (int) Configuration::get('PIWIK'.'SITEID');
-        if (!static::baseTest() || ($idSite <= 0))
+        }
+        if (!static::baseTest() || ($idSite <= 0)) {
             return false;
+        }
 
         $url = static::getBaseURL($idSite);
         $url .= "&method=SitesManager.getSiteFromId&format=JSON";
         $md5Url = md5($url);
         if (!isset(static::$_cachedResults[$md5Url])) {
-            if ($result = static::getAsJsonDecoded($url))
+            if ($result = static::getAsJsonDecoded($url)) {
                 static::$_cachedResults[$md5Url] = $result;
-            else
+            } else {
                 static::$_cachedResults[$md5Url] = false;
+            }
         }
         if (static::$_cachedResults[$md5Url] !== false) {
             if (isset(static::$_cachedResults[$md5Url]->result) && static::$_cachedResults[$md5Url]->result == 'error') {
@@ -353,17 +377,19 @@ class PKHelper
                 return false;
             }
             if ((bool) static::$_cachedResults[$md5Url][0]->ecommerce === false || static::$_cachedResults[$md5Url][0]->ecommerce == 0) {
-                if ((_PS_VERSION_ < '1.5'))
+                if ((_PS_VERSION_ < '1.5')) {
                     static::$error = static::l('E-commerce is not active for your site in piwik!');
-                else
+                } else {
                     static::$error = static::l('E-commerce is not active for your site in piwik!, you can enable it in the advanced settings on this page');
+                }
                 static::$errors[] = static::$error;
             }
             if ((bool) static::$_cachedResults[$md5Url][0]->sitesearch === false || static::$_cachedResults[$md5Url][0]->sitesearch == 0) {
-                if ((_PS_VERSION_ < '1.5'))
+                if ((_PS_VERSION_ < '1.5')) {
                     static::$error = static::l('Site search is not active for your site in piwik!');
-                else
+                } else {
                     static::$error = static::l('Site search is not active for your site in piwik!, you can enable it in the advanced settings on this page');
+                }
                 static::$errors[] = static::$error;
             }
 
@@ -375,8 +401,9 @@ class PKHelper
 
     public static function getPiwikSite2($idSite = 0)
     {
-        if ($idSite == 0)
+        if ($idSite == 0) {
             $idSite = (int) Configuration::get('PIWIK'.'SITEID');
+        }
         if ($result = static::getPiwikSite($idSite)) {
             $url = static::getBaseURL($idSite);
             $url .= "&method=SitesManager.getSiteUrlsFromId&format=JSON";
@@ -399,16 +426,18 @@ class PKHelper
      */
     public static function getTimezonesList()
     {
-        if (!static::baseTest())
+        if (!static::baseTest()) {
             return [];
+        }
         $url = static::getBaseURL();
         $url .= "&method=SitesManager.getTimezonesList&format=JSON";
         $md5Url = md5($url);
         if (!isset(static::$_cachedResults[$md5Url])) {
-            if ($result = static::getAsJsonDecoded($url))
+            if ($result = static::getAsJsonDecoded($url)) {
                 static::$_cachedResults[$md5Url] = $result;
-            else
+            } else {
                 static::$_cachedResults[$md5Url] = [];
+            }
         }
 
         return static::$_cachedResults[$md5Url];
@@ -421,16 +450,18 @@ class PKHelper
      */
     public static function getSitesWithViewAccess()
     {
-        if (!static::baseTest())
+        if (!static::baseTest()) {
             return [];
+        }
         $url = static::getBaseURL();
         $url .= "&method=SitesManager.getSitesWithViewAccess&format=JSON";
         $md5Url = md5($url);
         if (!isset(static::$_cachedResults[$md5Url])) {
-            if ($result = static::getAsJsonDecoded($url))
+            if ($result = static::getAsJsonDecoded($url)) {
                 static::$_cachedResults[$md5Url] = $result;
-            else
+            } else {
                 static::$_cachedResults[$md5Url] = [];
+            }
         }
 
         return static::$_cachedResults[$md5Url];
@@ -460,16 +491,18 @@ class PKHelper
      */
     public static function getSitesWithAdminAccess($fetchAliasUrls = false)
     {
-        if (!static::baseTest())
+        if (!static::baseTest()) {
             return [];
+        }
         $url = static::getBaseURL();
         $url .= "&method=SitesManager.getSitesWithAdminAccess&format=JSON".($fetchAliasUrls ? '&fetchAliasUrls=1' : '');
         $md5Url = md5($url);
         if (!isset(static::$_cachedResults[$md5Url."2"])) {
-            if ($result = static::getAsJsonDecoded($url))
+            if ($result = static::getAsJsonDecoded($url)) {
                 static::$_cachedResults[$md5Url] = $result;
-            else
+            } else {
                 static::$_cachedResults[$md5Url] = [];
+            }
         }
 
         return static::$_cachedResults[$md5Url];
@@ -484,16 +517,18 @@ class PKHelper
      */
     public static function getMyPiwikSiteIds()
     {
-        if (!static::baseTest())
+        if (!static::baseTest()) {
             return [];
+        }
         $url = static::getBaseURL();
         $url .= "&method=SitesManager.getSitesIdWithAdminAccess&format=JSON";
         $md5Url = md5($url);
         if (!isset(static::$_cachedResults[$md5Url])) {
-            if ($result = static::getAsJsonDecoded($url))
+            if ($result = static::getAsJsonDecoded($url)) {
                 static::$_cachedResults[$md5Url] = $result;
-            else
+            } else {
                 static::$_cachedResults[$md5Url] = [];
+            }
         }
 
         return static::$_cachedResults[$md5Url];
@@ -514,21 +549,27 @@ class PKHelper
      */
     protected static function getBaseURL($idSite = null, $pkHost = null, $https = null, $pkModule = 'API', $isoCode = null, $tokenAuth = null)
     {
-        if ($https === null)
+        if ($https === null) {
             $https = (bool) Configuration::get('PIWIK'.'CRHTTPS');
+        }
 
 
-        if (static::$piwikHost == "" || static::$piwikHost === false)
+        if (static::$piwikHost == "" || static::$piwikHost === false) {
             static::$piwikHost = Configuration::get('PIWIK'.'HOST');
+        }
 
-        if ($pkHost === null)
+        if ($pkHost === null) {
             $pkHost = static::$piwikHost;
-        if ($isoCode === null)
+        }
+        if ($isoCode === null) {
             $isoCode = strtolower((isset(Context::getContext()->language->iso_code) ? Context::getContext()->language->iso_code : 'en'));
-        if ($idSite === null)
+        }
+        if ($idSite === null) {
             $idSite = Configuration::get('PIWIK'.'SITEID');
-        if ($tokenAuth === null)
+        }
+        if ($tokenAuth === null) {
             $tokenAuth = Configuration::get('PIWIK'.'TOKEN_AUTH');
+        }
 
 
         return ($https ? 'https' : 'http')."://{$pkHost}index.php?module={$pkModule}&language={$isoCode}&idSite={$idSite}&token_auth={$tokenAuth}";
@@ -591,17 +632,20 @@ class PKHelper
         static $_error2 = false;
         PKHelper::debugLogger('START: PKHelper::get_http('.$url.','.print_r($headers, true).')');
         // class: Context is not loaded when using piwik.php proxy on prestashop 1.4
-        if (class_exists('Context', false))
+        if (class_exists('Context', false)) {
             $lng = strtolower((isset(Context::getContext()->language->iso_code) ? Context::getContext()->language->iso_code : 'en'));
-        else
+        } else {
             $lng = 'en';
+        }
 
         $timeout = 5; // should go in module conf
 
-        if (static::$httpAuthUsername == "" || static::$httpAuthUsername === false)
+        if (static::$httpAuthUsername == "" || static::$httpAuthUsername === false) {
             static::$httpAuthUsername = Configuration::get('PIWIK'.'PAUTHUSR');
-        if (static::$httpAuthPassword == "" || static::$httpAuthPassword === false)
+        }
+        if (static::$httpAuthPassword == "" || static::$httpAuthPassword === false) {
             static::$httpAuthPassword = Configuration::get('PIWIK'.'PAUTHPWD');
+        }
 
         $httpauth_usr = static::$httpAuthUsername;
         $httpauth_pwd = static::$httpAuthPassword;
@@ -634,8 +678,9 @@ class PKHelper
                     }
                 }
                 PKHelper::debugLogger('request returned ERROR: http response: '.$http_response);
-                if (isset($http_response_header))
+                if (isset($http_response_header)) {
                     PKHelper::debugLogger('$http_response_header: '.print_r($http_response_header, true));
+                }
                 if (!$_error2) {
                     static::$error = sprintf(static::l('Unable to connect to api%s'), " {$http_response}");
                     static::$errors[] = static::$error;
@@ -663,8 +708,9 @@ class PKHelper
                 );
                 PKHelper::debugLogger("\t: curl_setopt(\$ch, CURLOPT_HTTPHEADER, array(...))");
                 curl_setopt($ch, CURLOPT_USERAGENT, (isset($_SERVER['HTTP_USER_AGENT']) ? $_SERVER['HTTP_USER_AGENT'] : PKHelper::FAKEUSERAGENT));
-                if ((!empty($httpauth_usr) && !is_null($httpauth_usr) && $httpauth_usr !== false) && (!empty($httpauth_pwd) && !is_null($httpauth_pwd) && $httpauth_pwd !== false))
+                if ((!empty($httpauth_usr) && !is_null($httpauth_usr) && $httpauth_usr !== false) && (!empty($httpauth_pwd) && !is_null($httpauth_pwd) && $httpauth_pwd !== false)) {
                     curl_setopt($ch, CURLOPT_USERPWD, $httpauth_usr.":".$httpauth_pwd);
+                }
                 curl_setopt($ch, CURLOPT_TIMEOUT, $timeout);
                 curl_setopt($ch, CURLOPT_HTTPGET, 1); // just to be safe
                 curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
