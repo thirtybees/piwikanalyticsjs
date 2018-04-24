@@ -66,9 +66,9 @@ class PiwikAnalyticsController extends ModuleAdminController
         $PIWIK_SITEID = (int) Configuration::get('PIWIK_SITEID');
 
         $this->context->smarty->assign('help_link', 'https://github.com/cmjnisse/piwikanalyticsjs-prestashop/wiki');
-        // PKHelper::CPREFIX . 'USRNAME'
+        // 'PIWIK' . 'USRNAME'
         $user = Configuration::get('PIWIK_USRNAME');
-        // PKHelper::CPREFIX . 'USRPASSWD'
+        // 'PIWIK' . 'USRPASSWD'
         $passwd = Configuration::get('PIWIK_USRPASSWD');
         if ((!empty($user) && $user !== FALSE) && (!empty($passwd) && $passwd !== FALSE)) {
             $this->page_header_toolbar_btn['stats'] = [
