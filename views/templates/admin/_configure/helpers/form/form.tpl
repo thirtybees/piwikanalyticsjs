@@ -34,3 +34,15 @@
     {$smarty.block.parent}
   {/if}
 {/block}
+
+{block name="legend"}
+  <div class="panel-heading">
+    {if isset($field.image) && isset($field.title)}<img src="{$field.image|escape:'html'}"
+                                                        alt="{$field.title|escape:'html'}"
+                                                        {if isset($field.width)}width="{$field.width|intval}"{/if}
+                                                        {if isset($field.height)}height="{$field.height|intval}"{/if}
+      />{/if}
+    {if isset($field.icon)}<i class="{$field.icon|escape:'html'}"></i>{/if}
+    {$field.title|escape:'html'}
+  </div>
+{/block}

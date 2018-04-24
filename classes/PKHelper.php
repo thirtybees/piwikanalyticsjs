@@ -142,7 +142,7 @@ class PKHelper
      *
      * @param string $message
      */
-    public static function DebugLogger($message)
+    public static function debugLogger($message)
     {
         if (PKHelper::DEBUGLOG != 1)
             return;
@@ -589,7 +589,7 @@ class PKHelper
     public static function get_http($url, $headers = [])
     {
         static $_error2 = false;
-        PKHelper::DebugLogger('START: PKHelper::get_http('.$url.','.print_r($headers, true).')');
+        PKHelper::debugLogger('START: PKHelper::get_http('.$url.','.print_r($headers, true).')');
         // class: Context is not loaded when using piwik.php proxy on prestashop 1.4
         if (class_exists('Context', false))
             $lng = strtolower((isset(Context::getContext()->language->iso_code) ? Context::getContext()->language->iso_code : 'en'));
@@ -608,7 +608,7 @@ class PKHelper
 
         $use_cURL = (bool) Configuration::get('PIWIK'.'USE_CURL');
         if ($use_cURL === false) {
-            PKHelper::DebugLogger('Using \'file_get_contents\' to fetch remote');
+            PKHelper::debugLogger('Using \'file_get_contents\' to fetch remote');
             $httpauth = "";
             if ((!empty($httpauth_usr) && !is_null($httpauth_usr) && $httpauth_usr !== false) && (!empty($httpauth_pwd) && !is_null($httpauth_pwd) && $httpauth_pwd !== false)) {
                 $httpauth = "Authorization: Basic ".base64_encode("$httpauth_usr:$httpauth_pwd")."\r\n";
@@ -622,7 +622,7 @@ class PKHelper
                 ],
             ];
             $context = stream_context_create($options);
-            PKHelper::DebugLogger('Calling: '.$url.(!empty($httpauth) ? "\n\t- With Http auth" : ""));
+            PKHelper::debugLogger('Calling: '.$url.(!empty($httpauth) ? "\n\t- With Http auth" : ""));
             $result = @file_get_contents($url, false, $context);
             if ($result === false) {
                 $http_response = "";
@@ -633,35 +633,35 @@ class PKHelper
                         }
                     }
                 }
-                PKHelper::DebugLogger('request returned ERROR: http response: '.$http_response);
+                PKHelper::debugLogger('request returned ERROR: http response: '.$http_response);
                 if (isset($http_response_header))
-                    PKHelper::DebugLogger('$http_response_header: '.print_r($http_response_header, true));
+                    PKHelper::debugLogger('$http_response_header: '.print_r($http_response_header, true));
                 if (!$_error2) {
                     static::$error = sprintf(static::l('Unable to connect to api%s'), " {$http_response}");
                     static::$errors[] = static::$error;
                     $_error2 = true;
-                    PKHelper::DebugLogger('Last error message: '.static::$error);
+                    PKHelper::debugLogger('Last error message: '.static::$error);
                 }
             } else {
-                PKHelper::DebugLogger('request returned OK');
+                PKHelper::debugLogger('request returned OK');
             }
-            PKHelper::DebugLogger('END: PKHelper::get_http(): OK');
+            PKHelper::debugLogger('END: PKHelper::get_http(): OK');
 
             return $result;
         } else {
-            PKHelper::DebugLogger('Using \'cURL\' to fetch remote');
+            PKHelper::debugLogger('Using \'cURL\' to fetch remote');
             try {
                 $ch = curl_init();
-                PKHelper::DebugLogger("\t: \$ch = curl_init()");
+                PKHelper::debugLogger("\t: \$ch = curl_init()");
                 curl_setopt($ch, CURLOPT_URL, $url);
-                PKHelper::DebugLogger("\t: curl_setopt(\$ch, CURLOPT_URL, $url)");
+                PKHelper::debugLogger("\t: curl_setopt(\$ch, CURLOPT_URL, $url)");
                 // @TODO make this work, but how to filter out the headers from returned result??
                 //curl_setopt($ch, CURLOPT_HEADER, 1);
                 (!empty($headers) ?
                     curl_setopt($ch, CURLOPT_HTTPHEADER, $headers) :
                     curl_setopt($ch, CURLOPT_HTTPHEADER, ["Accept-language: {$lng}\r\n"])
                 );
-                PKHelper::DebugLogger("\t: curl_setopt(\$ch, CURLOPT_HTTPHEADER, array(...))");
+                PKHelper::debugLogger("\t: curl_setopt(\$ch, CURLOPT_HTTPHEADER, array(...))");
                 curl_setopt($ch, CURLOPT_USERAGENT, (isset($_SERVER['HTTP_USER_AGENT']) ? $_SERVER['HTTP_USER_AGENT'] : PKHelper::FAKEUSERAGENT));
                 if ((!empty($httpauth_usr) && !is_null($httpauth_usr) && $httpauth_usr !== false) && (!empty($httpauth_pwd) && !is_null($httpauth_pwd) && $httpauth_pwd !== false))
                     curl_setopt($ch, CURLOPT_USERPWD, $httpauth_usr.":".$httpauth_pwd);
@@ -678,13 +678,13 @@ class PKHelper
                     $return = false;
                 }
                 curl_close($ch);
-                PKHelper::DebugLogger('END: PKHelper::get_http(): OK');
+                PKHelper::debugLogger('END: PKHelper::get_http(): OK');
 
                 return $return;
             } catch (Exception $ex) {
                 static::$errors[] = $ex->getMessage();
-                PKHelper::DebugLogger('Exception: '.$ex->getMessage());
-                PKHelper::DebugLogger('END: PKHelper::get_http(): ERROR');
+                PKHelper::debugLogger('Exception: '.$ex->getMessage());
+                PKHelper::debugLogger('END: PKHelper::get_http(): ERROR');
 
                 return false;
             }

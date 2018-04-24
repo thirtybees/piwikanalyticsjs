@@ -144,16 +144,16 @@ class PiwikAnalyticsJs extends Module
         PKHelper::$errors = [];
 
         if ($this->id && !Configuration::get(static::TOKEN_AUTH) && !Tools::getIsset(static::TOKEN_AUTH)) {
-            $this->context->controller->errors[] = $this->l('Piwik auth token is empty');
+            $this->context->controller->errors[] = $this->l('Matomo auth token is empty');
         }
         if ($this->id && ((int) Configuration::get(static::SITEID) <= 0) && !Tools::getIsset(static::SITEID)) {
-            $this->context->controller->errors[] = $this->l('Piwik site id is lower or equal to "0"');
+            $this->context->controller->errors[] = $this->l('Matomo site id is lower or equal to "0"');
         }
         if ($this->id && !Configuration::get(static::HOST)) {
-            $this->context->controller->errors[] = $this->l('Piwik host cannot be empty');
+            $this->context->controller->errors[] = $this->l('Matomo host cannot be empty');
         }
 
-        $fields_form = [];
+        $fieldsForm = [];
 
         $languages = Language::getLanguages(false);
         foreach ($languages as $languages_key => $languages_value) {
@@ -177,13 +177,15 @@ class PiwikAnalyticsJs extends Module
         $helper->title = $this->displayName;
         $helper->submit_action = "submitUpdate{$this->name}";
 
-        $fields_form[0]['form']['legend'] = [
+        $fieldsForm[0]['form']['legend'] = [
             'title'  => $this->displayName,
             'image'  => $this->_path.'logo.gif',
+            'width'  => 20,
+            'height' => 20,
         ];
 
         if ($this->matomoSite !== false) {
-            $fields_form[0]['form']['input'][] = [
+            $fieldsForm[0]['form']['input'][] = [
                 'type' => 'html',
                 'name' => $this->l('Based on the settings you provided this is the info i get from Piwik!')."<br>"
                     ."<strong>".$this->l('Name')."</strong>: <i>{$this->matomoSite[0]->name}</i><br>"
@@ -191,25 +193,25 @@ class PiwikAnalyticsJs extends Module
                     ."<a href='#' onclick='return PiwikLookup();' title='{$this->l('Click here to open piwik site lookup wizard')}'>{$this->l('Configuration Wizard')}</a>",
             ];
         } else {
-            $fields_form[0]['form']['input'][] = [
+            $fieldsForm[0]['form']['input'][] = [
                 'type' => 'html',
                 'name' => "<a href='#' onclick='return PiwikLookup();' title='{$this->l('Click here to open piwik site lookup wizard')}'>{$this->l('Configuration Wizard')}</a>",
             ];
         }
 
-        $fields_form[0]['form']['input'][] = [
+        $fieldsForm[0]['form']['input'][] = [
             'type'     => 'text',
-            'label'    => $this->l('Piwik Host'),
+            'label'    => $this->l('Matomo Host'),
             'name'     => static::HOST,
-            'desc'     => $this->l('Example: www.example.com/piwik/ (without protocol and with / at the end!)'),
-            'hint'     => $this->l('The host where piwik is installed.!'),
+            'desc'     => $this->l('Example: www.example.com/matomo/ (without protocol and with / at the end!)'),
+            'hint'     => $this->l('The host where Matomo is installed.!'),
             'required' => true,
         ];
-        $fields_form[0]['form']['input'][] = [
+        $fieldsForm[0]['form']['input'][] = [
             'type'    => 'switch',
             'label'   => $this->l('Use proxy script'),
             'name'    => static::USE_PROXY,
-            'desc'    => $this->l('Whether or not to use the proxy insted of Piwik Host'),
+            'desc'    => $this->l('Whether or not to use the proxy instead of the Matomo host directly'),
             'values'  => [
                 [
                     'id'    => 'active_on',
@@ -223,7 +225,7 @@ class PiwikAnalyticsJs extends Module
                 ],
             ],
         ];
-        $fields_form[0]['form']['input'][] = [
+        $fieldsForm[0]['form']['input'][] = [
             'type'     => 'text',
             'label'    => $this->l('Proxy script'),
             'name'     => static::PROXY_SCRIPT,
@@ -231,22 +233,22 @@ class PiwikAnalyticsJs extends Module
             'desc'     => sprintf($this->l('the FULL path to proxy script to use, build-in: [%s]'), $this->context->link->getModuleLink($this->name, 'piwik', [], true)),
             'required' => false,
         ];
-        $fields_form[0]['form']['input'][] = [
+        $fieldsForm[0]['form']['input'][] = [
             'type'     => 'text',
-            'label'    => $this->l('Piwik site id'),
+            'label'    => $this->l('Matomo site id'),
             'name'     => static::SITEID,
             'desc'     => $this->l('Example: 10'),
-            'hint'     => $this->l('You can find piwik site id by loggin to piwik installation.'),
+            'hint'     => $this->l('You can find Matomo site id by loggin to Matomo installation.'),
             'required' => true,
         ];
-        $fields_form[0]['form']['input'][] = [
+        $fieldsForm[0]['form']['input'][] = [
             'type'     => 'text',
-            'label'    => $this->l('Piwik token auth'),
+            'label'    => $this->l('Matomo token auth'),
             'name'     => static::TOKEN_AUTH,
-            'desc'     => $this->l('You can find piwik token by loggin to piwik installation. under API'),
+            'desc'     => $this->l('You can find Matomo token by loggin to Matomo installation. under API'),
             'required' => true,
         ];
-        $fields_form[0]['form']['input'][] = [
+        $fieldsForm[0]['form']['input'][] = [
             'type'     => 'text',
             'label'    => $this->l('Track visitors across subdomains'),
             'name'     => static::COOKIE_DOMAIN,
@@ -256,7 +258,7 @@ class PiwikAnalyticsJs extends Module
             'hint'     => $this->l('So if one visitor visits x.example.com and y.example.com, they will be counted as a unique visitor. (setCookieDomain)'),
             'required' => false,
         ];
-        $fields_form[0]['form']['input'][] = [
+        $fieldsForm[0]['form']['input'][] = [
             'type'     => 'text',
             'label'    => $this->l('Hide known alias URLs'),
             'name'     => static::SET_DOMAINS,
@@ -270,7 +272,7 @@ class PiwikAnalyticsJs extends Module
             'hint'     => $this->l('So clicks on links to Alias URLs (eg. x.example.com) will not be counted as "Outlink". (setDomains)'),
             'required' => false,
         ];
-        $fields_form[0]['form']['input'][] = [
+        $fieldsForm[0]['form']['input'][] = [
             'type'    => 'switch',
             'is_bool' => true, //retro compat 1.5
             'label'   => $this->l('Enable client side DoNotTrack detection'),
@@ -303,26 +305,31 @@ class PiwikAnalyticsJs extends Module
         }
         PKHelper::$error = '';
         PKHelper::$errors = [];
-        $fields_form[0]['form']['input'][] = [
+        $fieldsForm[0]['form']['input'][] = [
             'type' => 'html',
-            'name' => $this->l('Piwik image tracking code append one of them to field "Extra HTML" this will add images tracking code to all your pages')."<br>"
+            'name' => $this->l('Matomo image tracking code append one of them to field "Extra HTML" this will add images tracking code to all your pages')."<br>"
                 ."<strong>".$this->l('default')."</strong>:<br /><i>{$imageTracking['default']}</i><br>"
                 ."<strong>".$this->l('using proxy script')."</strong>:<br /><i>{$imageTracking['proxy']}</i><br>",
         ];
-        $fields_form[0]['form']['input'][] = [
-            'type'  => 'textarea',
-            'label' => $this->l('Extra HTML'),
-            'name'  => static::EXHTML,
-            'desc'  => $this->l('Some extra HTML code to put after the piwik tracking code, this can be any html of your choice'),
-            'rows'  => 10,
-            'cols'  => 50,
+        $fieldsForm[0]['form']['input'][] = [
+            'type'                      => 'code',
+            'label'                     => $this->l('Extra HTML'),
+            'id'                        => static::EXHTML,
+            'name'                      => static::EXHTML,
+            'desc'                      => $this->l('Some extra HTML code to put after the Matomo tracking code, this can be any html of your choice'),
+            'rows'                      => 10,
+            'cols'                      => 50,
+            'mode'                      => 'html',
+            'enableBasicAutocompletion' => true,
+            'enableSnippets'            => true,
+            'enableLiveAutocompletion'  => true,
         ];
 
-        $fields_form[0]['form']['input'][] = [
+        $fieldsForm[0]['form']['input'][] = [
             'type'    => 'select',
-            'label'   => $this->l('Piwik Currency'),
+            'label'   => $this->l('Matomo Currency'),
             'name'    => static::DEFAULT_CURRENCY,
-            'desc'    => sprintf($this->l('Based on your settings in Piwik your default currency is %s'), ($this->matomoSite !== false ? $this->matomoSite[0]->currency : $this->l('unknown'))),
+            'desc'    => sprintf($this->l('Based on your settings in Matomo your default currency is %s'), ($this->matomoSite !== false ? $this->matomoSite[0]->currency : $this->l('unknown'))),
             'options' => [
                 'default' => ['value' => 0, 'label' => $this->l('Choose currency')],
                 'query' => array_map(function ($currency) {
@@ -336,11 +343,11 @@ class PiwikAnalyticsJs extends Module
             ],
         ];
 
-        $fields_form[0]['form']['input'][] = [
+        $fieldsForm[0]['form']['input'][] = [
             'type'    => 'select',
-            'label'   => $this->l('Piwik Report date'),
+            'label'   => $this->l('Matomo Report date'),
             'name'    => static::DREPDATE,
-            'desc'    => $this->l('Report date to load by default from "Stats => Piwik Analytics"'),
+            'desc'    => $this->l('Report date to load by default from "Stats => Matomo Analytics"'),
             'options' => [
                 'default' => ['value' => 'day|today', 'label' => $this->l('Today')],
                 'query'   => [
@@ -359,46 +366,44 @@ class PiwikAnalyticsJs extends Module
             ],
         ];
 
-        $fields_form[0]['form']['input'][] = [
+        $fieldsForm[0]['form']['input'][] = [
             'type'         => 'text',
-            'label'        => $this->l('Piwik User name'),
+            'label'        => $this->l('Matomo User name'),
             'name'         => static::USRNAME,
-            'desc'         => $this->l('You can store your Username for Piwik here to make it easy to open piwik interface from your stats page with automatic login'),
+            'desc'         => $this->l('You can store your Username for Matomo here to make it easy to open Matomo interface from your stats page with automatic login'),
             'required'     => false,
             'autocomplete' => false,
         ];
-        $fields_form[0]['form']['input'][] = [
+        $fieldsForm[0]['form']['input'][] = [
             'type'         => 'password',
-            'label'        => $this->l('Piwik User password'),
+            'label'        => $this->l('Matomo User password'),
             'name'         => static::USRPASSWD,
-            'desc'         => $this->l('You can store your Password for Piwik here to make it easy to open piwik interface from your stats page with automatic login'),
+            'desc'         => $this->l('You can store your Password for Matomo here to make it easy to open Matomo interface from your stats page with automatic login'),
             'required'     => false,
             'autocomplete' => false,
         ];
 
-        $fields_form[0]['form']['submit'] = [
+        $fieldsForm[0]['form']['submit'] = [
             'title' => $this->l('Save'),
-            'class' => 'btn btn-default',
+            'class' => 'btn btn-default pull-right',
         ];
 
 
-        $fields_form[1]['form'] = [
+        $fieldsForm[1]['form'] = [
             'legend' => [
-                'title' => $this->displayName.' '.$this->l('Advanced'),
-                'image' => $this->_path.'logo.png',
+                'title'  => $this->displayName.' '.$this->l('Advanced'),
+                'image'  => $this->_path.'logo.gif',
+                'width'  => 20,
+                'height' => 20,
             ],
+            'description' => $this->l('In this section you can modify certain aspects of the way this plugin sends products, searches, category view etc... to Matomo'),
             'input'  => [
                 [
-                    'type' => 'html',
-                    'name' => $this->l('In this section you can modify certain aspects of the way this plugin sends products, searches, category view etc.. to piwik'),
-                ],
-                [
                     'type'    => 'switch',
-                    'is_bool' => true, //retro compat 1.5
                     'label'   => $this->l('Use HTTPS'),
                     'name'    => static::CRHTTPS,
-                    'hint'    => $this->l('ONLY enable this feature if piwik installation is accessible via https'),
-                    'desc'    => $this->l('use Hypertext Transfer Protocol Secure (HTTPS) in all requests from code to piwik, this only affects how requests are sent from proxy script to piwik, your visitors will still use the protocol they visit your shop with'),
+                    'hint'    => $this->l('ONLY enable this feature if Matomo installation is accessible via https'),
+                    'desc'    => $this->l('use Hypertext Transfer Protocol Secure (HTTPS) in all requests from code to Matomo, this only affects how requests are sent from proxy script to piwik, your visitors will still use the protocol they visit your shop with'),
                     'values'  => [
                         [
                             'id'    => 'active_on',
@@ -414,7 +419,7 @@ class PiwikAnalyticsJs extends Module
                 ],
                 [
                     'type' => 'html',
-                    'name' => $this->l('in the next few inputs you can set how the product id is passed on to piwik')
+                    'name' => $this->l('in the next few inputs you can set how the product id is passed on to Matomo')
                         .'<br />'
                         .$this->l('there are three variables you can use:')
                         .'<br />'
@@ -449,35 +454,35 @@ class PiwikAnalyticsJs extends Module
                 ],
                 [
                     'type' => 'html',
-                    'name' => "<strong>{$this->l('Piwik Cookies')}</strong>",
+                    'name' => "<strong>{$this->l('Matomo Cookies')}</strong>",
                 ],
                 [
                     'type'     => 'text',
-                    'label'    => $this->l('Piwik Session Cookie timeout'),
+                    'label'    => $this->l('Matomo Session Cookie timeout'),
                     'name'     => static::SESSION_TIMEOUT,
                     'required' => false,
                     'hint'     => $this->l('this value must be set in minutes'),
-                    'desc'     => $this->l('Piwik Session Cookie timeout, the default is 30 minutes'),
+                    'desc'     => $this->l('Matomo Session Cookie timeout, the default is 30 minutes'),
                 ],
                 [
                     'type'     => 'text',
-                    'label'    => $this->l('Piwik Visitor Cookie timeout'),
+                    'label'    => $this->l('Matomo Visitor Cookie timeout'),
                     'name'     => static::COOKIE_TIMEOUT,
                     'required' => false,
                     'hint'     => $this->l('this value must be set in minutes'),
-                    'desc'     => $this->l('Piwik Visitor Cookie timeout, the default is 13 months (569777 minutes)'),
+                    'desc'     => $this->l('Matomo Visitor Cookie timeout, the default is 13 months (569777 minutes)'),
                 ],
                 [
                     'type'     => 'text',
-                    'label'    => $this->l('Piwik Referral Cookie timeout'),
+                    'label'    => $this->l('Matomo Referral Cookie timeout'),
                     'name'     => static::RCOOKIE_TIMEOUT,
                     'required' => false,
                     'hint'     => $this->l('this value must be set in minutes'),
-                    'desc'     => $this->l('Piwik Referral Cookie timeout, the default is 6 months (262974 minutes)'),
+                    'desc'     => $this->l('Matomo Referral Cookie timeout, the default is 6 months (262974 minutes)'),
                 ],
                 [
                     'type' => 'html',
-                    'name' => "<strong>{$this->l('Piwik Proxy Script Authorization? if piwik is installed behind HTTP Basic Authorization (Both password and username must be filled before the values will be used)')}</strong>",
+                    'name' => "<strong>{$this->l('Matomo Proxy Script Authorization? If Matomo is installed behind HTTP Basic Authorization (Both password and username must be filled before the values will be used)')}</strong>",
                 ],
                 [
                     'type'         => 'text',
@@ -485,7 +490,7 @@ class PiwikAnalyticsJs extends Module
                     'name'         => static::PAUTHUSR,
                     'required'     => false,
                     'autocomplete' => false,
-                    'desc'         => $this->l('this field along with password can be used if piwik installation is protected by HTTP Basic Authorization'),
+                    'desc'         => $this->l('this field along with password can be used if Matomo installation is protected by HTTP Basic Authorization'),
                 ],
                 [
                     'type'         => 'password',
@@ -493,12 +498,12 @@ class PiwikAnalyticsJs extends Module
                     'name'         => static::PAUTHPWD,
                     'required'     => false,
                     'autocomplete' => false,
-                    'desc'         => $this->l('this field along with username can be used if piwik installation is protected by HTTP Basic Authorization'),
+                    'desc'         => $this->l('this field along with username can be used if Matomo installation is protected by HTTP Basic Authorization'),
                 ],
             ],
             'submit' => [
                 'title' => $this->l('Save'),
-                'class' => 'btn btn-default',
+                'class' => 'btn btn-default pull-right',
             ],
         ];
 
@@ -509,7 +514,7 @@ class PiwikAnalyticsJs extends Module
             }
             PKHelper::$error = '';
             PKHelper::$errors = [];
-            $pksite_default = ['value' => 0, 'label' => $this->l('Choose Piwik site')];
+            $pksite_default = ['value' => 0, 'label' => $this->l('Choose Matomo site')];
             $pksites = [];
             foreach ($tmp as $pksid) {
                 $pksites[] = [
@@ -539,17 +544,17 @@ class PiwikAnalyticsJs extends Module
                 }
             }
             unset($tmp, $pktz, $pktzV, $pktzK);
-            $fields_form[2]['form'] = [
+            $fieldsForm[2]['form'] = [
                 'legend' => [
-                    'title' => $this->displayName.' '.$this->l('Advanced').' - '.$this->l('Edit Piwik site'),
+                    'title' => $this->displayName.' '.$this->l('Advanced').' - '.$this->l('Edit Matomo site'),
                     'image' => $this->_path.'logo.png',
                 ],
                 'input'  => [
                     [
                         'type'     => 'select',
-                        'label'    => $this->l('Piwik Site'),
+                        'label'    => $this->l('Matomo Site'),
                         'name'     => 'SPKSID',
-                        'desc'     => sprintf($this->l('Based on your settings in Piwik your default site is %s'), $this->matomoSite[0]->idsite),
+                        'desc'     => sprintf($this->l('Based on your settings in Matomo your default site is %s'), $this->matomoSite[0]->idsite),
                         'options'  => [
                             'default' => $pksite_default,
                             'query'   => $pksites,
@@ -560,7 +565,7 @@ class PiwikAnalyticsJs extends Module
                     ],
                     [
                         'type' => 'html',
-                        'name' => $this->l('In this section you can modify your settings in piwik just so you don\'t have to login to Piwik to do this')."<br>"
+                        'name' => $this->l('In this section you can modify your settings in Matomo just so you don\'t have to login to Matomo to do this')."<br>"
                             ."<strong>".$this->l('Currently selected name')."</strong>: <i id='wnamedsting'>{$this->matomoSite[0]->name}</i><br>"
                             ."<input type=\"hidden\" name=\"PKAdminIdSite\" id=\"PKAdminIdSite\" value=\"{$this->matomoSite[0]->idsite}\" />",
                     ],
@@ -613,23 +618,23 @@ class PiwikAnalyticsJs extends Module
                         ],
                     ],
                     [
-                        'type'  => (version_compare(_PS_VERSION_, '1.6.0.0', '>=') ? 'tags' : 'text'),
+                        'type'  => 'tags',
                         'label' => $this->l('Search Keyword Parameters'),
                         'name'  => 'PKAdminSearchKeywordParameters',
                     ],
                     [
-                        'type'  => (version_compare(_PS_VERSION_, '1.6.0.0', '>=') ? 'tags' : 'text'),
+                        'type'  => 'tags',
                         'label' => $this->l('Search Category Parameters'),
                         'name'  => 'PKAdminSearchCategoryParameters',
                     ],
                     [
-                        'type'  => (version_compare(_PS_VERSION_, '1.6.0.0', '>=') ? 'tags' : 'text'),
+                        'type'  => 'tags',
                         'label' => $this->l('Excluded ip addresses'),
                         'name'  => 'PKAdminExcludedIps',
                         'desc'  => $this->l('ip addresses excluded from tracking, separated by comma ","'),
                     ],
                     [
-                        'type'  => (version_compare(_PS_VERSION_, '1.6.0.0', '>=') ? 'tags' : 'text'),
+                        'type'  => 'tags',
                         'label' => $this->l('Excluded Query Parameters'),
                         'name'  => 'PKAdminExcludedQueryParameters',
                         'desc'  => $this->l('please read: http://piwik.org/faq/how-to/faq_81/'),
@@ -638,7 +643,7 @@ class PiwikAnalyticsJs extends Module
                         'type'    => 'select',
                         'label'   => $this->l('Timezone'),
                         'name'    => 'PKAdminTimezone',
-                        'desc'    => sprintf($this->l('Based on your settings in Piwik your default timezone is %s'), $this->matomoSite[0]->timezone),
+                        'desc'    => sprintf($this->l('Based on your settings in Matomo your default timezone is %s'), $this->matomoSite[0]->timezone),
                         'options' => [
                             'default'     => $pktimezone_default,
                             'optiongroup' => [
@@ -656,7 +661,7 @@ class PiwikAnalyticsJs extends Module
                         'type'    => 'select',
                         'label'   => $this->l('Currency'),
                         'name'    => 'PKAdminCurrency',
-                        'desc'    => sprintf($this->l('Based on your settings in Piwik your default currency is %s'), $this->matomoSite[0]->currency),
+                        'desc'    => sprintf($this->l('Based on your settings in Matomo your default currency is %s'), $this->matomoSite[0]->currency),
                         'options' => [
                             'default' => ['value' => 0, 'label' => $this->l('Choose currency')],
                             'query'   => array_map(function ($currency) {
@@ -733,7 +738,7 @@ class PiwikAnalyticsJs extends Module
             'psm_token'        => $helper->token,
         ]);
 
-        return $helper->generateForm($fields_form)
+        return $helper->generateForm($fieldsForm)
             .$this->display(__FILE__, 'views/templates/admin/piwik_site_manager.tpl')
             .$this->display(__FILE__, 'views/templates/admin/piwik_site_lookup.tpl');
     }
@@ -747,7 +752,7 @@ class PiwikAnalyticsJs extends Module
             $order = PKHelper::$acp[$apiMethod]['order'];
             foreach ($required as $requiredOption) {
                 if (!Tools::getIsset($requiredOption)) {
-                    PKHelper::DebugLogger("__pkapicall():\n\t- Required parameter \"".$requiredOption.'" is missing');
+                    PKHelper::debugLogger("__pkapicall():\n\t- Required parameter \"".$requiredOption.'" is missing');
                     die(json_encode(['error' => true, 'message' => sprintf($this->l('Required parameter "%s" is missing'), $requiredOption)]));
                 }
             }
@@ -769,7 +774,7 @@ class PiwikAnalyticsJs extends Module
                 PKHelper::$piwikHost = Tools::getValue('piwikhost');
             }
 
-            PKHelper::DebugLogger("__pkapicall():\n\t- Call PKHelper::".$apiMethod);
+            PKHelper::debugLogger("__pkapicall():\n\t- Call PKHelper::".$apiMethod);
             $result = call_user_func_array(['PKHelper', $apiMethod], $order);
             if ($result === false) {
                 $lastError = "";
@@ -778,7 +783,7 @@ class PiwikAnalyticsJs extends Module
                 }
                 die(json_encode(['error' => true, 'message' => sprintf($this->l('Unknown error occurred%s'), $lastError)]));
             } else {
-                PKHelper::DebugLogger("__pkapicall():\n\t- Al good");
+                PKHelper::debugLogger("__pkapicall():\n\t- Al good");
                 if (is_array($result) && isset($result[0])) {
                     $message = $result;
                 } else {
@@ -801,14 +806,12 @@ class PiwikAnalyticsJs extends Module
     }
 
     /**
-     * @return string
+     * @return void
      *
      * @throws PrestaShopException
      */
     private function processFormsUpdate()
     {
-
-        $_html = "";
         if (Tools::isSubmit('submitUpdate'.$this->name)) {
             if (Tools::getIsset(static::HOST)) {
                 $tmp = Tools::getValue(static::HOST, '');
@@ -819,21 +822,21 @@ class PiwikAnalyticsJs extends Module
                     }
                     Configuration::updateValue(static::HOST, $tmp);
                 } else {
-                    $_html .= $this->displayError($this->l('Piwik host cannot be empty'));
+                    $this->context->controller->errors[] = $this->l('Matomo host cannot be empty');
                 }
             }
             if (Tools::getIsset(static::SITEID)) {
                 $tmp = (int) Tools::getValue(static::SITEID, 0);
                 Configuration::updateValue(static::SITEID, $tmp);
                 if ($tmp <= 0) {
-                    $_html .= $this->displayError($this->l('Piwik site id is lower or equal to "0"'));
+                    $this->context->controller->errors[] = $this->l('Matomo site id is lower or equal to "0"');
                 }
             }
             if (Tools::getIsset(static::TOKEN_AUTH)) {
                 $tmp = Tools::getValue(static::TOKEN_AUTH, '');
                 Configuration::updateValue(static::TOKEN_AUTH, $tmp);
                 if (empty($tmp)) {
-                    $_html .= $this->displayError($this->l('Piwik auth token is empty'));
+                    $this->context->controller->errors[] = $this->l('Matomo auth token is empty');
                 }
             }
             /* setReferralCookieTimeout */
@@ -862,9 +865,6 @@ class PiwikAnalyticsJs extends Module
              */
             if (Tools::getIsset(static::USE_PROXY)) {
                 Configuration::updateValue(static::USE_PROXY, Tools::getValue(static::USE_PROXY));
-            }
-            if (Tools::getIsset(static::USE_CURL)) {
-                Configuration::updateValue(static::USE_CURL, Tools::getValue(static::USE_CURL));
             }
             if (Tools::getIsset(static::EXHTML)) {
                 Configuration::updateValue(static::EXHTML, Tools::getValue(static::EXHTML), true);
@@ -915,10 +915,10 @@ class PiwikAnalyticsJs extends Module
                 Configuration::updateValue(static::DREPDATE, Tools::getValue(static::DREPDATE, 'day|tody'));
             }
 
-            $_html .= $this->displayConfirmation($this->l('Configuration Updated'));
+            if (empty($this->context->controller->errors)) {
+                $this->context->controller->confirmations[] = $this->l('Configuration Updated');
+            }
         }
-
-        return $_html;
     }
 
     /**
@@ -1441,30 +1441,14 @@ class PiwikAnalyticsJs extends Module
         $tab->active = true;
 
         if (method_exists('Tab', 'getInstanceFromClassName')) {
-            if (version_compare(_PS_VERSION_, '1.5.0.5', ">=") && version_compare(_PS_VERSION_, '1.5.3.999', "<=")) {
-                $tab->class_name = 'PiwikAnalytics15';
-            } else {
-                if (version_compare(_PS_VERSION_, '1.5.0.13', "<=")) {
-                    $tab->class_name = 'AdminPiwikAnalytics';
-                } else {
-                    $tab->class_name = 'PiwikAnalytics';
-                }
-            }
+            $tab->class_name = 'PiwikAnalytics';
             $AdminParentStats = TabCore::getInstanceFromClassName('AdminStats');
             if ($AdminParentStats == null || !($AdminParentStats instanceof Tab || $AdminParentStats instanceof TabCore) || $AdminParentStats->id == 0) {
                 $AdminParentStats = TabCore::getInstanceFromClassName('AdminParentStats');
             }
         } else {
             if (method_exists('Tab', 'getIdFromClassName')) {
-                if (version_compare(_PS_VERSION_, '1.5.0.5', ">=") && version_compare(_PS_VERSION_, '1.5.3.999', "<=")) {
-                    $tab->class_name = 'PiwikAnalytics15';
-                } else {
-                    if (version_compare(_PS_VERSION_, '1.5.0.13', "<=")) {
-                        $tab->class_name = 'AdminPiwikAnalytics';
-                    } else {
-                        $tab->class_name = 'PiwikAnalytics';
-                    }
-                }
+                $tab->class_name = 'PiwikAnalytics';
                 $tmpId = TabCore::getIdFromClassName('AdminStats');
                 if ($tmpId != null && $tmpId > 0) {
                     $AdminParentStats = new Tab($tmpId);
@@ -1569,26 +1553,10 @@ class PiwikAnalyticsJs extends Module
             }
             try {
                 if (method_exists('Tab', 'getInstanceFromClassName')) {
-                    if (version_compare(_PS_VERSION_, '1.5.0.5', ">=") && version_compare(_PS_VERSION_, '1.5.3.999', "<=")) {
-                        $AdminParentStats = Tab::getInstanceFromClassName('PiwikAnalytics15');
-                    } else {
-                        if (version_compare(_PS_VERSION_, '1.5.0.4', "<=")) {
-                            $AdminParentStats = Tab::getInstanceFromClassName('AdminPiwikAnalytics');
-                        } else {
-                            $AdminParentStats = Tab::getInstanceFromClassName('PiwikAnalytics');
-                        }
-                    }
+                    $AdminParentStats = Tab::getInstanceFromClassName('PiwikAnalytics');
                 } else {
                     if (method_exists('Tab', 'getIdFromClassName')) {
-                        if (version_compare(_PS_VERSION_, '1.5.0.5', ">=") && version_compare(_PS_VERSION_, '1.5.3.999', "<=")) {
-                            $tmpId = Tab::getIdFromClassName('PiwikAnalytics15');
-                        } else {
-                            if (version_compare(_PS_VERSION_, '1.5.0.4', "<=")) {
-                                $tmpId = Tab::getIdFromClassName('AdminPiwikAnalytics');
-                            } else {
-                                $tmpId = Tab::getIdFromClassName('PiwikAnalytics');
-                            }
-                        }
+                        $tmpId = Tab::getIdFromClassName('PiwikAnalytics');
                         if ($tmpId != null && $tmpId > 0) {
                             $AdminParentStats = new Tab($tmpId);
                         }
