@@ -628,7 +628,6 @@ class PKHelper
      */
     protected static function getAsJsonDecoded($url)
     {
-        static $_error2 = false;
         $getF = static::get_http($url);
         if ($getF !== false) {
             return json_decode($getF);
@@ -648,13 +647,7 @@ class PKHelper
     {
         static $_error2 = false;
         PKHelper::debugLogger('START: PKHelper::get_http('.$url.','.print_r($headers, true).')');
-        // class: Context is not loaded when using piwik.php proxy on prestashop 1.4
-        if (class_exists('Context', false)) {
-            $lng = strtolower((isset(Context::getContext()->language->iso_code) ? Context::getContext()->language->iso_code : 'en'));
-        } else {
-            $lng = 'en';
-        }
-
+        $lng = strtolower((isset(Context::getContext()->language->iso_code) ? Context::getContext()->language->iso_code : 'en'));
         $timeout = 5; // should go in module conf
 
         if (static::$httpAuthUsername == "" || static::$httpAuthUsername === false) {
