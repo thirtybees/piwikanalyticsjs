@@ -110,7 +110,7 @@ class PKHelper
     public static $piwikHost = '';
 
     /**
-     * create a log of all events if set to "1", usfull if tracking not working
+     * create a log of all events if set to "1", useful if tracking is not working
      * Log debug == 1
      * DO NOT log == 0
      * log will be saved to [PS ROOT]/log/YYYYMMDD_piwik.debug.log
@@ -177,8 +177,24 @@ class PKHelper
      *
      * @throws PrestaShopException
      */
-    public static function updatePiwikSite($idSite, $siteName = null, $urls = null, $ecommerce = null, $siteSearch = null, $searchKeywordParameters = null, $searchCategoryParameters = null, $excludedIps = null, $excludedQueryParameters = null, $timezone = null, $currency = null, $group = null, $startDate = null, $excludedUserAgents = null, $keepURLFragments = null, $type = null)
-    {
+    public static function updatePiwikSite(
+        $idSite,
+        $siteName = null,
+        $urls = null,
+        $ecommerce = null,
+        $siteSearch = null,
+        $searchKeywordParameters = null,
+        $searchCategoryParameters = null,
+        $excludedIps = null,
+        $excludedQueryParameters = null,
+        $timezone = null,
+        $currency = null,
+        $group = null,
+        $startDate = null,
+        $excludedUserAgents = null,
+        $keepURLFragments = null,
+        $type = null
+    ) {
         if (!static::baseTest() || ($idSite <= 0)) {
             return false;
         }
@@ -236,7 +252,10 @@ class PKHelper
             $url2 = static::getBaseURL($idSite)."&method=SitesManager.getSiteFromId&format=JSON";
             unset(static::$_cachedResults[md5($url2)]); // Clear cache for updated site
 
-            return ($result->result == 'success' && $result->message == 'ok' ? true : ($result->result != 'success' ? $result->message : false));
+            return (
+                $result['result'] == 'success'
+                && $result['message'] == 'ok' ? true : ($result['result'] != 'success' ? $result['message'] : false)
+            );
         } else {
             return false;
         }
@@ -312,14 +331,14 @@ class PKHelper
             'proxy'   => static::l('I need Site ID and Auth Token before i can get your image tracking code'),
         ];
 
-        $idSite = (int) Configuration::get('PIWIK'.'SITEID');
+        $idSite = (int) Configuration::get(PiwikAnalyticsJs::SITEID);
         if (!static::baseTest() || ($idSite <= 0)) {
             return $ret;
         }
 
         $url = static::getBaseURL();
         $url .= "&method=SitesManager.getImageTrackingCode&format=JSON&actionName=NoJavaScript";
-        $url .= "&piwikUrl=".urlencode(rtrim(Configuration::get('PIWIK'.'HOST'), '/'));
+        $url .= "&piwikUrl=".urlencode(rtrim(Configuration::get(PiwikAnalyticsJs::HOST), '/'));
         $md5Url = md5($url);
         if (!isset(static::$_cachedResults[$md5Url])) {
             if ($result = static::getAsJsonDecoded($url)) {
@@ -331,9 +350,17 @@ class PKHelper
         if (static::$_cachedResults[$md5Url] !== false) {
             $ret['default'] = htmlentities('<noscript>'.static::$_cachedResults[$md5Url]->value.'</noscript>');
             if ((bool) Configuration::get('PS_REWRITING_SETTINGS')) {
-                $ret['proxy'] = str_replace(Configuration::get('PIWIK'.'HOST').'piwik.php', Configuration::get('PIWIK'.'PROXY_SCRIPT'), $ret['default']);
+                $ret['proxy'] = str_replace(
+                    Configuration::get(PiwikAnalyticsJs::HOST).'piwik.php',
+                    Configuration::get('PIWIK'.'PROXY_SCRIPT'),
+                    $ret['default']
+                );
             } else {
-                $ret['proxy'] = str_replace(Configuration::get('PIWIK'.'HOST').'piwik.php?', Configuration::get('PIWIK'.'PROXY_SCRIPT').'&', $ret['default']);
+                $ret['proxy'] = str_replace(
+                    Configuration::get(PiwikAnalyticsJs::HOST).'piwik.php?',
+                    Configuration::get('PIWIK'.'PROXY_SCRIPT').'&',
+                    $ret['default']
+                );
             }
         }
 
@@ -343,14 +370,14 @@ class PKHelper
     /**
      * get Piwik site based on the current settings in the configuration
      *
-     * @return stdClass[]
+     * @return stdClass[]|false
      *
      * @throws PrestaShopException
      */
     public static function getPiwikSite($idSite = 0)
     {
         if ($idSite == 0) {
-            $idSite = (int) Configuration::get('PIWIK'.'SITEID');
+            $idSite = (int) Configuration::get(PiwikAnalyticsJs::SITEID);
         }
         if (!static::baseTest() || ($idSite <= 0)) {
             return false;
@@ -377,19 +404,11 @@ class PKHelper
                 return false;
             }
             if ((bool) static::$_cachedResults[$md5Url][0]->ecommerce === false || static::$_cachedResults[$md5Url][0]->ecommerce == 0) {
-                if ((_PS_VERSION_ < '1.5')) {
-                    static::$error = static::l('E-commerce is not active for your site in piwik!');
-                } else {
-                    static::$error = static::l('E-commerce is not active for your site in piwik!, you can enable it in the advanced settings on this page');
-                }
+                static::$error = static::l('E-commerce is not active for your site in piwik!, you can enable it in the advanced settings on this page');
                 static::$errors[] = static::$error;
             }
             if ((bool) static::$_cachedResults[$md5Url][0]->sitesearch === false || static::$_cachedResults[$md5Url][0]->sitesearch == 0) {
-                if ((_PS_VERSION_ < '1.5')) {
-                    static::$error = static::l('Site search is not active for your site in piwik!');
-                } else {
-                    static::$error = static::l('Site search is not active for your site in piwik!, you can enable it in the advanced settings on this page');
-                }
+                static::$error = static::l('Site search is not active for your site in piwik!, you can enable it in the advanced settings on this page');
                 static::$errors[] = static::$error;
             }
 
@@ -402,7 +421,7 @@ class PKHelper
     public static function getPiwikSite2($idSite = 0)
     {
         if ($idSite == 0) {
-            $idSite = (int) Configuration::get('PIWIK'.'SITEID');
+            $idSite = (int) Configuration::get(PiwikAnalyticsJs::SITEID);
         }
         if ($result = static::getPiwikSite($idSite)) {
             $url = static::getBaseURL($idSite);
@@ -550,12 +569,12 @@ class PKHelper
     protected static function getBaseURL($idSite = null, $pkHost = null, $https = null, $pkModule = 'API', $isoCode = null, $tokenAuth = null)
     {
         if ($https === null) {
-            $https = (bool) Configuration::get('PIWIK'.'CRHTTPS');
+            $https = (bool) Configuration::get(PiwikAnalyticsJs::CRHTTPS);
         }
 
 
         if (static::$piwikHost == "" || static::$piwikHost === false) {
-            static::$piwikHost = Configuration::get('PIWIK'.'HOST');
+            static::$piwikHost = Configuration::get(PiwikAnalyticsJs::HOST);
         }
 
         if ($pkHost === null) {
@@ -565,10 +584,10 @@ class PKHelper
             $isoCode = strtolower((isset(Context::getContext()->language->iso_code) ? Context::getContext()->language->iso_code : 'en'));
         }
         if ($idSite === null) {
-            $idSite = Configuration::get('PIWIK'.'SITEID');
+            $idSite = Configuration::get(PiwikAnalyticsJs::SITEID);
         }
         if ($tokenAuth === null) {
-            $tokenAuth = Configuration::get('PIWIK'.'TOKEN_AUTH');
+            $tokenAuth = Configuration::get(PiwikAnalyticsJs::TOKEN_AUTH);
         }
 
 
@@ -584,11 +603,11 @@ class PKHelper
     protected static function baseTest()
     {
         static $_error1 = false;
-        $pkToken = Configuration::get('PIWIK'.'TOKEN_AUTH');
-        $pkHost = Configuration::get('PIWIK'.'HOST');
+        $pkToken = Configuration::get(PiwikAnalyticsJs::TOKEN_AUTH);
+        $pkHost = Configuration::get(PiwikAnalyticsJs::HOST);
         if (empty($pkToken) || empty($pkHost)) {
             if (!$_error1) {
-                static::$error = static::l('Piwik auth token and/or Piwik site id cannot be empty');
+                static::$error = static::l('Matomo auth token and/or Matomo site id cannot be empty');
                 static::$errors[] = static::$error;
                 $_error1 = true;
             }
@@ -610,8 +629,6 @@ class PKHelper
     protected static function getAsJsonDecoded($url)
     {
         static $_error2 = false;
-        $use_cURL = (bool) Configuration::get('PIWIK'.'USE_CURL');
-
         $getF = static::get_http($url);
         if ($getF !== false) {
             return json_decode($getF);
@@ -641,100 +658,56 @@ class PKHelper
         $timeout = 5; // should go in module conf
 
         if (static::$httpAuthUsername == "" || static::$httpAuthUsername === false) {
-            static::$httpAuthUsername = Configuration::get('PIWIK'.'PAUTHUSR');
+            static::$httpAuthUsername = Configuration::get(PiwikAnalyticsJs::PAUTHUSR);
         }
         if (static::$httpAuthPassword == "" || static::$httpAuthPassword === false) {
-            static::$httpAuthPassword = Configuration::get('PIWIK'.'PAUTHPWD');
+            static::$httpAuthPassword = Configuration::get(PiwikAnalyticsJs::PAUTHPWD);
         }
 
         $httpauth_usr = static::$httpAuthUsername;
         $httpauth_pwd = static::$httpAuthPassword;
 
-        $use_cURL = (bool) Configuration::get('PIWIK'.'USE_CURL');
-        if ($use_cURL === false) {
-            PKHelper::debugLogger('Using \'file_get_contents\' to fetch remote');
-            $httpauth = "";
-            if ((!empty($httpauth_usr) && !is_null($httpauth_usr) && $httpauth_usr !== false) && (!empty($httpauth_pwd) && !is_null($httpauth_pwd) && $httpauth_pwd !== false)) {
-                $httpauth = "Authorization: Basic ".base64_encode("$httpauth_usr:$httpauth_pwd")."\r\n";
-            }
-            $options = [
-                'http' => [
-                    'user_agent' => (isset($_SERVER['HTTP_USER_AGENT']) ? $_SERVER['HTTP_USER_AGENT'] : PKHelper::FAKEUSERAGENT),
-                    'method'     => "GET",
-                    'timeout'    => $timeout,
-                    'header'     => (!empty($headers) ? implode('', $headers) : "Accept-language: {$lng}\r\n").$httpauth,
-                ],
-            ];
-            $context = stream_context_create($options);
-            PKHelper::debugLogger('Calling: '.$url.(!empty($httpauth) ? "\n\t- With Http auth" : ""));
-            $result = @file_get_contents($url, false, $context);
-            if ($result === false) {
-                $http_response = "";
-                if (isset($http_response_header) && is_array($http_response_header)) {
-                    foreach ($http_response_header as $value) {
-                        if (preg_match("/^HTTP\/.*/i", $value)) {
-                            $http_response = ':'.$value;
-                        }
-                    }
-                }
-                PKHelper::debugLogger('request returned ERROR: http response: '.$http_response);
-                if (isset($http_response_header)) {
-                    PKHelper::debugLogger('$http_response_header: '.print_r($http_response_header, true));
-                }
-                if (!$_error2) {
-                    static::$error = sprintf(static::l('Unable to connect to api%s'), " {$http_response}");
-                    static::$errors[] = static::$error;
-                    $_error2 = true;
-                    PKHelper::debugLogger('Last error message: '.static::$error);
-                }
-            } else {
-                PKHelper::debugLogger('request returned OK');
-            }
-            PKHelper::debugLogger('END: PKHelper::get_http(): OK');
-
-            return $result;
-        } else {
-            PKHelper::debugLogger('Using \'cURL\' to fetch remote');
-            try {
-                $ch = curl_init();
-                PKHelper::debugLogger("\t: \$ch = curl_init()");
-                curl_setopt($ch, CURLOPT_URL, $url);
-                PKHelper::debugLogger("\t: curl_setopt(\$ch, CURLOPT_URL, $url)");
-                // @TODO make this work, but how to filter out the headers from returned result??
-                //curl_setopt($ch, CURLOPT_HEADER, 1);
-                (!empty($headers) ?
-                    curl_setopt($ch, CURLOPT_HTTPHEADER, $headers) :
-                    curl_setopt($ch, CURLOPT_HTTPHEADER, ["Accept-language: {$lng}\r\n"])
-                );
-                PKHelper::debugLogger("\t: curl_setopt(\$ch, CURLOPT_HTTPHEADER, array(...))");
-                curl_setopt($ch, CURLOPT_USERAGENT, (isset($_SERVER['HTTP_USER_AGENT']) ? $_SERVER['HTTP_USER_AGENT'] : PKHelper::FAKEUSERAGENT));
-                if ((!empty($httpauth_usr) && !is_null($httpauth_usr) && $httpauth_usr !== false) && (!empty($httpauth_pwd) && !is_null($httpauth_pwd) && $httpauth_pwd !== false)) {
-                    curl_setopt($ch, CURLOPT_USERPWD, $httpauth_usr.":".$httpauth_pwd);
-                }
-                curl_setopt($ch, CURLOPT_TIMEOUT, $timeout);
-                curl_setopt($ch, CURLOPT_HTTPGET, 1); // just to be safe
-                curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-                curl_setopt($ch, CURLOPT_FAILONERROR, true);
-                if (($return = curl_exec($ch)) === false) {
-                    if (!$_error2) {
-                        static::$error = curl_error($ch);
-                        static::$errors[] = static::$error;
-                        $_error2 = true;
-                    }
-                    $return = false;
-                }
-                curl_close($ch);
-                PKHelper::debugLogger('END: PKHelper::get_http(): OK');
-
-                return $return;
-            } catch (Exception $ex) {
-                static::$errors[] = $ex->getMessage();
-                PKHelper::debugLogger('Exception: '.$ex->getMessage());
-                PKHelper::debugLogger('END: PKHelper::get_http(): ERROR');
-
-                return false;
-            }
+        PKHelper::debugLogger('Using \'file_get_contents\' to fetch remote');
+        $httpauth = '';
+        if ((!empty($httpauth_usr) && !is_null($httpauth_usr) && $httpauth_usr !== false) && (!empty($httpauth_pwd) && !is_null($httpauth_pwd) && $httpauth_pwd !== false)) {
+            $httpauth = "Authorization: Basic ".base64_encode("$httpauth_usr:$httpauth_pwd")."\r\n";
         }
+        $options = [
+            'http' => [
+                'user_agent' => (isset($_SERVER['HTTP_USER_AGENT']) ? $_SERVER['HTTP_USER_AGENT'] : PKHelper::FAKEUSERAGENT),
+                'method'     => "GET",
+                'timeout'    => $timeout,
+                'header'     => (!empty($headers) ? implode('', $headers) : "Accept-language: {$lng}\r\n").$httpauth,
+            ],
+        ];
+        $context = stream_context_create($options);
+        PKHelper::debugLogger('Calling: '.$url.(!empty($httpauth) ? "\n\t- With Http auth" : ""));
+        $result = @file_get_contents($url, false, $context);
+        if ($result === false) {
+            $http_response = "";
+            if (isset($http_response_header) && is_array($http_response_header)) {
+                foreach ($http_response_header as $value) {
+                    if (preg_match("/^HTTP\/.*/i", $value)) {
+                        $http_response = ':'.$value;
+                    }
+                }
+            }
+            PKHelper::debugLogger('request returned ERROR: http response: '.$http_response);
+            if (isset($http_response_header)) {
+                PKHelper::debugLogger('$http_response_header: '.print_r($http_response_header, true));
+            }
+            if (!$_error2) {
+                static::$error = sprintf(static::l('Unable to connect to the API%s'), " {$http_response}");
+                static::$errors[] = static::$error;
+                $_error2 = true;
+                PKHelper::debugLogger('Last error message: '.static::$error);
+            }
+        } else {
+            PKHelper::debugLogger('request returned OK');
+        }
+        PKHelper::debugLogger('END: PKHelper::get_http(): OK');
+
+        return $result;
     }
 
     /**

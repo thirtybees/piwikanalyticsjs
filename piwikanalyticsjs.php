@@ -48,8 +48,8 @@ class PiwikAnalyticsJs extends Module
      */
     const PK_SC_TIMEOUT = 30;
     const TOKEN_AUTH = 'PIWIK_TOKEN_AUTH';
-    const SITEID = 'PIWIK_TOKEN_SITE_ID';
-    const HOST = 'PIWIK_TOKEN_HOST';
+    const SITEID = 'PIWIK_SITEID';
+    const HOST = 'PIWIK_HOST';
     const USE_PROXY = 'PIWIK_USE_PROXY';
     const PROXY_SCRIPT = 'PIWIK_PROXY_SCRIPT';
     const COOKIE_DOMAIN = 'PIWIK_COOKIE_DOMAIN';
@@ -70,6 +70,8 @@ class PiwikAnalyticsJs extends Module
     const DREPDATE = 'PIWIK_DREPDATE';
     const RCOOKIE_TIMEOUT = 'PIWIK_RCOOKIE_TIMEOUT';
     const ORDER = 'PIWIK_ORDER';
+    const ORDER_PRODUCTS = 'PIWIK_ORDER_PRODUCTS';
+    const ORDER_DETAILS = 'PIWIK_ORDER_DETAILS';
     const CART = 'PIWIK_CART';
     const UUID = 'PIWIK_UUID';
     const SITE_SEARCH = 'PIWIK_SITE_SEARCH';
@@ -77,6 +79,7 @@ class PiwikAnalyticsJs extends Module
     const CART_PRODUCTS = 'PIWIK_CART_PRODUCTS';
     const CART_TOTAL = 'PIWIK_CART_TOTAL';
     const PRODUCTS = 'PIWIK_PRODUCTS';
+    const category = 'PIWIK_category';
     /** @var bool $isOrder */
     private static $isOrder = false;
     /** @var bool $matomoSite */
@@ -214,11 +217,11 @@ class PiwikAnalyticsJs extends Module
             'required' => true,
         ];
         $fieldsForm[0]['form']['input'][] = [
-            'type'    => 'switch',
-            'label'   => $this->l('Use proxy script'),
-            'name'    => static::USE_PROXY,
-            'desc'    => $this->l('Whether or not to use the proxy instead of the Matomo host directly'),
-            'values'  => [
+            'type'   => 'switch',
+            'label'  => $this->l('Use proxy script'),
+            'name'   => static::USE_PROXY,
+            'desc'   => $this->l('Whether or not to use the proxy instead of the Matomo host directly'),
+            'values' => [
                 [
                     'id'    => 'active_on',
                     'value' => 1,
@@ -236,7 +239,10 @@ class PiwikAnalyticsJs extends Module
             'label'    => $this->l('Proxy script'),
             'name'     => static::PROXY_SCRIPT,
             'hint'     => $this->l('Example: www.example.com/pkproxy.php'),
-            'desc'     => sprintf($this->l('the FULL path to proxy script to use, build-in: [%s]'), $this->context->link->getModuleLink($this->name, 'piwik', [], true)),
+            'desc'     => sprintf(
+                $this->l('the FULL path to proxy script to use, build-in: [%s]'),
+                $this->context->link->getModuleLink($this->name, 'piwik', [], true)
+            ),
             'required' => false,
         ];
         $fieldsForm[0]['form']['input'][] = [
@@ -244,14 +250,14 @@ class PiwikAnalyticsJs extends Module
             'label'    => $this->l('Matomo site id'),
             'name'     => static::SITEID,
             'desc'     => $this->l('Example: 10'),
-            'hint'     => $this->l('You can find Matomo site id by loggin to Matomo installation.'),
+            'hint'     => $this->l('You can find your Matomo Site ID by logging in your Matomo installation. Under Settings > Websites > Manage'),
             'required' => true,
         ];
         $fieldsForm[0]['form']['input'][] = [
             'type'     => 'text',
-            'label'    => $this->l('Matomo token auth'),
+            'label'    => $this->l('Matomo auth token'),
             'name'     => static::TOKEN_AUTH,
-            'desc'     => $this->l('You can find Matomo token by loggin to Matomo installation. under API'),
+            'desc'     => $this->l('You can find Matomo token by logging in on your Matomo installation. Under Settings > Platform > API'),
             'required' => true,
         ];
         $fieldsForm[0]['form']['input'][] = [
@@ -306,11 +312,13 @@ class PiwikAnalyticsJs extends Module
                 'proxy'   => $this->l('I need Site ID and Auth Token before i can get your image tracking code'),
             ];
         }
+
         foreach (PKHelper::$errors as $error) {
             $this->context->controller->errors[] = $error;
         }
         PKHelper::$error = '';
         PKHelper::$errors = [];
+
         $fieldsForm[0]['form']['input'][] = [
             'type' => 'html',
             'name' => $this->l('Matomo image tracking code append one of them to field "Extra HTML" this will add images tracking code to all your pages')."<br>"
@@ -338,13 +346,13 @@ class PiwikAnalyticsJs extends Module
             'desc'    => sprintf($this->l('Based on your settings in Matomo your default currency is %s'), ($this->matomoSite !== false ? $this->matomoSite[0]->currency : $this->l('unknown'))),
             'options' => [
                 'default' => ['value' => 0, 'label' => $this->l('Choose currency')],
-                'query' => array_map(function ($currency) {
+                'query'   => array_map(function ($currency) {
                     return [
                         'iso_code' => $currency['iso_code'],
                         'name'     => "{$currency['name']} {$currency['iso_code']}",
                     ];
                 }, Currency::getCurrencies()),
-                'id'    => 'iso_code',
+                'id'      => 'iso_code',
                 'name'    => 'name',
             ],
         ];
@@ -396,21 +404,23 @@ class PiwikAnalyticsJs extends Module
 
 
         $fieldsForm[1]['form'] = [
-            'legend' => [
+            'legend'      => [
                 'title'  => $this->displayName.' '.$this->l('Advanced'),
                 'image'  => $this->_path.'logo.gif',
                 'width'  => 20,
                 'height' => 20,
             ],
             'description' => $this->l('In this section you can modify certain aspects of the way this plugin sends products, searches, category view etc... to Matomo'),
-            'input'  => [
+            'input'       => [
                 [
-                    'type'    => 'switch',
-                    'label'   => $this->l('Use HTTPS'),
-                    'name'    => static::CRHTTPS,
-                    'hint'    => $this->l('ONLY enable this feature if Matomo installation is accessible via https'),
-                    'desc'    => $this->l('use Hypertext Transfer Protocol Secure (HTTPS) in all requests from code to Matomo, this only affects how requests are sent from proxy script to piwik, your visitors will still use the protocol they visit your shop with'),
-                    'values'  => [
+                    'type'   => 'switch',
+                    'label'  => $this->l('Use HTTPS'),
+                    'name'   => static::CRHTTPS,
+                    'hint'   => $this->l('ONLY enable this feature if Matomo installation is accessible via https'),
+                    'desc'   => $this->l('Use Hypertext Transfer Protocol Secure (HTTPS) in all requests from code to Matomo.').
+                        '<br>'.$this->l('This only affects how requests are sent from proxy script to piwik.').
+                        '<br>'.$this->l('Your visitors will still use the protocol they visit your shop with.'),
+                    'values' => [
                         [
                             'id'    => 'active_on',
                             'value' => 1,
@@ -429,11 +439,11 @@ class PiwikAnalyticsJs extends Module
                         .'<br />'
                         .$this->l('there are three variables you can use:')
                         .'<br />'
-                        .$this->l('{ID} : this variable is replaced with id the product has in prestashop')
+                        .'<kbd>{ID}</kbd>: '.$this->l('this variable is replaced with id the product has in thirty bees')
                         .'<br />'
-                        .$this->l('{REFERENCE} : this variable is replaced with the unique reference you when adding adding/updating a product, this variable is only available in prestashop 1.5 and up')
+                        .'<kbd>{REFERENCE}</kbd>: '.$this->l('this variable is replaced with the unique reference you when adding adding/updating a product')
                         .'<br />'
-                        .$this->l('{ATTRID} : this variable is replaced with id the product attribute')
+                        .'<kbd>{ATTRID}</kbd>: '.$this->l('this variable is replaced with id the product attribute')
                         .'<br />'
                         .$this->l('in cases where only the product id is available it be parsed as ID and nothing else'),
                 ],
@@ -507,7 +517,7 @@ class PiwikAnalyticsJs extends Module
                     'desc'         => $this->l('this field along with username can be used if Matomo installation is protected by HTTP Basic Authorization'),
                 ],
             ],
-            'submit' => [
+            'submit'      => [
                 'title' => $this->l('Save'),
                 'class' => 'btn btn-default pull-right',
             ],
@@ -533,8 +543,11 @@ class PiwikAnalyticsJs extends Module
             $pktimezone_default = ['value' => 0, 'label' => $this->l('Choose Timezone')];
             $pktimezones = [];
             $tmp = PKHelper::getTimezonesList();
-            $this->displayErrors(PKHelper::$errors);
-            PKHelper::$errors = PKHelper::$error = "";
+            foreach (PKHelper::$errors as $error) {
+                $this->context->controller->errors[] = $error;
+            }
+            PKHelper::$error = '';
+            PKHelper::$errors = [];
             foreach ($tmp as $key => $pktz) {
                 if (!isset($pktimezones[$key])) {
                     $pktimezones[$key] = [
@@ -552,8 +565,10 @@ class PiwikAnalyticsJs extends Module
             unset($tmp, $pktz, $pktzV, $pktzK);
             $fieldsForm[2]['form'] = [
                 'legend' => [
-                    'title' => $this->displayName.' '.$this->l('Advanced').' - '.$this->l('Edit Matomo site'),
-                    'image' => $this->_path.'logo.png',
+                    'title'  => $this->displayName.' '.$this->l('Advanced').' - '.$this->l('Edit Matomo site'),
+                    'image'  => $this->_path.'logo.gif',
+                    'width'  => 20,
+                    'height' => 20,
                 ],
                 'input'  => [
                     [
@@ -673,7 +688,7 @@ class PiwikAnalyticsJs extends Module
                             'query'   => array_map(function ($currency) {
                                 return [
                                     'iso_code' => $currency['iso_code'],
-                                    'name'     => "{$currency['name']} {$currency['iso_code']}",
+                                    'name'     => "{$currency['name']} ({$currency['iso_code']})",
                                 ];
                             }, Currency::getCurrencies()),
                             'id'      => 'iso_code',
@@ -750,7 +765,7 @@ class PiwikAnalyticsJs extends Module
             .$this->display(__FILE__, 'views/templates/admin/piwik_site_lookup.tpl');
     }
 
-    private function __pkapicall()
+    protected function __pkapicall()
     {
         $apiMethod = Tools::getValue('pkapicall');
         if (method_exists('PKHelper', $apiMethod) && isset(PKHelper::$acp[$apiMethod])) {
@@ -817,13 +832,13 @@ class PiwikAnalyticsJs extends Module
      *
      * @throws PrestaShopException
      */
-    private function processFormsUpdate()
+    protected function processFormsUpdate()
     {
         if (Tools::isSubmit('submitUpdate'.$this->name)) {
             if (Tools::getIsset(static::HOST)) {
                 $tmp = Tools::getValue(static::HOST, '');
                 if (!empty($tmp) && (filter_var($tmp, FILTER_VALIDATE_URL) || filter_var('http://'.$tmp, FILTER_VALIDATE_URL))) {
-                    $tmp = str_replace(['http://', 'https://', '//'], "", $tmp);
+                    $tmp = str_replace(['http://', 'https://', '//'], '', $tmp);
                     if (substr($tmp, -1) != "/") {
                         $tmp .= "/";
                     }
@@ -904,14 +919,14 @@ class PiwikAnalyticsJs extends Module
             if (Tools::getIsset(static::USRNAME)) {
                 Configuration::updateValue(static::USRNAME, Tools::getValue(static::USRNAME, ''));
             }
-            if (Tools::getIsset(static::USRPASSWD) && Tools::getValue(static::USRPASSWD, '') != "") {
+            if (Tools::getIsset(static::USRPASSWD) && Tools::getValue(static::USRPASSWD, '') != '') {
                 Configuration::updateValue(static::USRPASSWD, Tools::getValue(static::USRPASSWD, Configuration::get(static::USRPASSWD)));
             }
 
             if (Tools::getIsset(static::PAUTHUSR)) {
                 Configuration::updateValue(static::PAUTHUSR, Tools::getValue(static::PAUTHUSR, ''));
             }
-            if (Tools::getIsset(static::PAUTHPWD) && Tools::getValue(static::PAUTHPWD, '') != "") {
+            if (Tools::getIsset(static::PAUTHPWD) && Tools::getValue(static::PAUTHPWD, '') != '') {
                 Configuration::updateValue(static::PAUTHPWD, Tools::getValue(static::PAUTHPWD, Configuration::get(static::PAUTHPWD)));
             }
 
@@ -941,28 +956,28 @@ class PiwikAnalyticsJs extends Module
         $PIWIK_SESSION_TIMEOUT = (int) Configuration::get(static::SESSION_TIMEOUT);
 
         return [
-            static::HOST                    => Configuration::get(static::HOST),
-            static::SITEID                  => Configuration::get(static::SITEID),
-            static::TOKEN_AUTH              => Configuration::get(static::TOKEN_AUTH),
-            static::SESSION_TIMEOUT         => ($PIWIK_SESSION_TIMEOUT != 0 ? (int) ($PIWIK_SESSION_TIMEOUT / 60) : (int) (static::PK_SC_TIMEOUT)),
-            static::COOKIE_TIMEOUT          => ($PIWIK_COOKIE_TIMEOUT != 0 ? (int) ($PIWIK_COOKIE_TIMEOUT / 60) : (int) (static::PK_VC_TIMEOUT)),
-            static::RCOOKIE_TIMEOUT         => ($PIWIK_RCOOKIE_TIMEOUT != 0 ? (int) ($PIWIK_RCOOKIE_TIMEOUT / 60) : (int) (static::PK_RC_TIMEOUT)),
-            static::USE_PROXY               => Configuration::get(static::USE_PROXY),
-            static::EXHTML                  => Configuration::get(static::EXHTML),
-            static::CRHTTPS                 => Configuration::get(static::CRHTTPS),
-            static::DEFAULT_CURRENCY        => Configuration::get(static::DEFAULT_CURRENCY),
-            static::PRODID_V1               => (!empty($PIWIK_PRODID_V1) ? $PIWIK_PRODID_V1 : '{ID}-{ATTRID}#{REFERENCE}'),
-            static::PRODID_V2               => (!empty($PIWIK_PRODID_V2) ? $PIWIK_PRODID_V2 : '{ID}#{REFERENCE}'),
-            static::PRODID_V3               => (!empty($PIWIK_PRODID_V3) ? $PIWIK_PRODID_V3 : '{ID}-{ATTRID}'),
-            static::COOKIE_DOMAIN           => Configuration::get(static::COOKIE_DOMAIN),
-            static::SET_DOMAINS             => Configuration::get(static::SET_DOMAINS),
-            static::DNT                     => Configuration::get(static::DNT),
-            static::PROXY_SCRIPT            => empty($PIWIK_PROXY_SCRIPT) ? str_replace(['http://', 'https://'], '', $this->context->link->getModuleLink($this->name, 'piwik', [], true)) : $PIWIK_PROXY_SCRIPT,
-            static::USRNAME                 => Configuration::get(static::USRNAME),
-            static::USRPASSWD               => Configuration::get(static::USRPASSWD),
-            static::PAUTHUSR                => Configuration::get(static::PAUTHUSR),
-            static::PAUTHPWD                => Configuration::get(static::PAUTHPWD),
-            static::DREPDATE                => Configuration::get(static::DREPDATE),
+            static::HOST                      => Configuration::get(static::HOST),
+            static::SITEID                    => Configuration::get(static::SITEID),
+            static::TOKEN_AUTH                => Configuration::get(static::TOKEN_AUTH),
+            static::SESSION_TIMEOUT           => ($PIWIK_SESSION_TIMEOUT != 0 ? (int) ($PIWIK_SESSION_TIMEOUT / 60) : (int) (static::PK_SC_TIMEOUT)),
+            static::COOKIE_TIMEOUT            => ($PIWIK_COOKIE_TIMEOUT != 0 ? (int) ($PIWIK_COOKIE_TIMEOUT / 60) : (int) (static::PK_VC_TIMEOUT)),
+            static::RCOOKIE_TIMEOUT           => ($PIWIK_RCOOKIE_TIMEOUT != 0 ? (int) ($PIWIK_RCOOKIE_TIMEOUT / 60) : (int) (static::PK_RC_TIMEOUT)),
+            static::USE_PROXY                 => Configuration::get(static::USE_PROXY),
+            static::EXHTML                    => Configuration::get(static::EXHTML),
+            static::CRHTTPS                   => Configuration::get(static::CRHTTPS),
+            static::DEFAULT_CURRENCY          => Configuration::get(static::DEFAULT_CURRENCY),
+            static::PRODID_V1                 => (!empty($PIWIK_PRODID_V1) ? $PIWIK_PRODID_V1 : '{ID}-{ATTRID}#{REFERENCE}'),
+            static::PRODID_V2                 => (!empty($PIWIK_PRODID_V2) ? $PIWIK_PRODID_V2 : '{ID}#{REFERENCE}'),
+            static::PRODID_V3                 => (!empty($PIWIK_PRODID_V3) ? $PIWIK_PRODID_V3 : '{ID}-{ATTRID}'),
+            static::COOKIE_DOMAIN             => Configuration::get(static::COOKIE_DOMAIN),
+            static::SET_DOMAINS               => Configuration::get(static::SET_DOMAINS),
+            static::DNT                       => Configuration::get(static::DNT),
+            static::PROXY_SCRIPT              => empty($PIWIK_PROXY_SCRIPT) ? str_replace(['http://', 'https://'], '', $this->context->link->getModuleLink($this->name, 'piwik', [], true)) : $PIWIK_PROXY_SCRIPT,
+            static::USRNAME                   => Configuration::get(static::USRNAME),
+            static::USRPASSWD                 => Configuration::get(static::USRPASSWD),
+            static::PAUTHUSR                  => Configuration::get(static::PAUTHUSR),
+            static::PAUTHPWD                  => Configuration::get(static::PAUTHPWD),
+            static::DREPDATE                  => Configuration::get(static::DREPDATE),
             /* stuff thats isset by ajax calls to Piwik API ---(here to avoid not isset warnings..!)--- */
             'PKAdminSiteName'                 => ($this->matomoSite !== false ? $this->matomoSite[0]->name : ''),
             'PKAdminEcommerce'                => ($this->matomoSite !== false ? $this->matomoSite[0]->ecommerce : ''),
@@ -1000,21 +1015,19 @@ class PiwikAnalyticsJs extends Module
     }
 
     /**
-     * @param $params
-     *
      * @return string
      * @throws PrestaShopDatabaseException
      * @throws PrestaShopException
      * @throws SmartyException
      */
-    public function hookFooter($params)
+    public function hookFooter()
     {
         if ((int) Configuration::get(static::SITEID) <= 0) {
-            return "";
+            return '';
         }
 
         if (static::$isOrder) {
-            return "";
+            return '';
         }
 
         $this->setDefaultConfig();
@@ -1036,7 +1049,7 @@ class PiwikAnalyticsJs extends Module
                 $smarty_ad[] = [
                     'SKU'      => $this->parseProductSku($value['id_product'], (isset($value['id_product_attribute']) && $value['id_product_attribute'] > 0 ? $value['id_product_attribute'] : false), (isset($value['reference']) ? $value['reference'] : false)),
                     'NAME'     => $value['name'].(isset($value['attributes']) ? ' ('.$value['attributes'].')' : ''),
-                    'CATEGORY' => $this->get_category_names_by_product($value['id_product'], false),
+                    'CATEGORY' => $this->getCategoryNamesByProduct($value['id_product'], false),
                     'PRICE'    => $this->currencyConvertion(
                         [
                             'price'           => $value['total_wt'],
@@ -1084,7 +1097,7 @@ class PiwikAnalyticsJs extends Module
 
         $this->context->smarty->assign(['PK404' => $is404]);
 
-        $this->_hookFooter($params);
+        $this->prepareHookFooter();
 
         return $this->display(__FILE__, 'views/templates/hook/jstracking.tpl');
     }
@@ -1094,7 +1107,6 @@ class PiwikAnalyticsJs extends Module
      */
     protected function setDefaultConfig()
     {
-
         $this->context->smarty->assign(static::USE_PROXY, (bool) Configuration::get(static::USE_PROXY));
 
         //* using proxy script?
@@ -1189,7 +1201,7 @@ class PiwikAnalyticsJs extends Module
      * @since 0.4
      * @throws PrestaShopException
      */
-    private function currencyConvertion($params)
+    protected function currencyConvertion($params)
     {
         $pkc = Configuration::get("PIWIK_DEFAULT_CURRENCY");
         if (empty($pkc)) {
@@ -1203,24 +1215,21 @@ class PiwikAnalyticsJs extends Module
 
             return Tools::convertPrice($_shop_price, Currency::getCurrencyInstance((int) (Currency::getIdByIsoCode($pkc))));
         }
-
-        return (float) $params['price'];
     }
 
     /**
      * add Prestashop !LATEST! specific settings
      *
-     * @param mixed $params
-     *
      * @throws PrestaShopDatabaseException
      * @throws PrestaShopException
      * @since 0.4
      */
-    private function _hookFooter($params)
+    protected function prepareHookFooter()
     {
         /* product tracking */
-        if (get_class($this->context->controller) == 'ProductController') {
-            $products = [['product' => $this->context->controller->getProduct(), 'categorys' => null]];
+        $controller = $this->context->controller;
+        if ($controller instanceof ProductController) {
+            $products = [['product' => $controller->getProduct(), 'categorys' => null]];
             if (isset($products) && isset($products[0]['product'])) {
                 $smarty_ad = [];
                 foreach ($products as $product) {
@@ -1228,7 +1237,7 @@ class PiwikAnalyticsJs extends Module
                         continue;
                     }
                     if ($product['categorys'] == null) {
-                        $product['categorys'] = $this->get_category_names_by_product($product['product']->id, false);
+                        $product['categorys'] = $this->getCategoryNamesByProduct($product['product']->id, false);
                     }
                     $smarty_ad[] = [
                         /* (required) SKU: Product unique identifier */
@@ -1252,8 +1261,8 @@ class PiwikAnalyticsJs extends Module
         }
 
         /* category tracking */
-        if (get_class($this->context->controller) == 'CategoryController') {
-            $category = $this->context->controller->getCategory();
+        if ($controller instanceof CategoryController) {
+            $category = $controller->getCategory();
             if (Validate::isLoadedObject($category)) {
                 $this->context->smarty->assign([
                     static::category => ['NAME' => $category->name],
@@ -1269,34 +1278,47 @@ class PiwikAnalyticsJs extends Module
      * @param mixed $param
      *
      * @return string
+     * @throws PrestaShopDatabaseException
+     * @throws PrestaShopException
+     * @throws SmartyException
      */
     public function hookdisplayRightColumnProduct($param)
     {
         if ((int) Configuration::get(static::SITEID) <= 0) {
-            return "";
+            return '';
         }
         if ((int) Tools::getValue('content_only') > 0 && get_class($this->context->controller) == 'ProductController') { // we also do this in the tpl file.!
             return $this->hookFooter($param);
         }
+
+        return '';
     }
 
     /**
      * only checks that the module is registered in hook "footer",
      * this why we only appent javescript to the end of the page!
      *
-     * @param mixed $params
+     * @throws PrestaShopException
      */
-    public function hookHeader($params)
+    public function hookHeader()
     {
         if (!$this->isRegisteredInHook('footer')) {
             $this->registerHook('footer');
         }
     }
 
+    /**
+     * @param array $params
+     *
+     * @return string
+     * @throws PrestaShopDatabaseException
+     * @throws PrestaShopException
+     * @throws SmartyException
+     */
     public function hookOrderConfirmation($params)
     {
         if ((int) Configuration::get(static::SITEID) <= 0) {
-            return "";
+            return '';
         }
 
         $order = $params['objOrder'];
@@ -1313,7 +1335,7 @@ class PiwikAnalyticsJs extends Module
                 $smarty_ad[] = [
                     'SKU'      => $this->parseProductSku($value['product_id'], (isset($value['product_attribute_id']) ? $value['product_attribute_id'] : false), (isset($value['product_reference']) ? $value['product_reference'] : false)),
                     'NAME'     => $value['product_name'],
-                    'CATEGORY' => $this->get_category_names_by_product($value['product_id'], false),
+                    'CATEGORY' => $this->getCategoryNamesByProduct($value['product_id'], false),
                     'PRICE'    => $this->currencyConvertion(
                         [
                             'price'           => (isset($value['total_price_tax_incl']) ? floatval($value['total_price_tax_incl']) : (isset($value['total_price_tax_incl']) ? floatval($value['total_price_tax_incl']) : 0.00)),
@@ -1385,11 +1407,13 @@ class PiwikAnalyticsJs extends Module
      * @param array $params
      *
      * @since 0.4
+     * @return string
+     * @throws PrestaShopException
      */
     public function hookSearch($params)
     {
         if ((int) Configuration::get(static::SITEID) <= 0) {
-            return "";
+            return '';
         }
         $this->hookactionSearch($params);
     }
@@ -1409,7 +1433,7 @@ class PiwikAnalyticsJs extends Module
         }
         $param['total'] = intval($param['total']);
         /* if multi pages in search add page number of current if set! */
-        $page = "";
+        $page = '';
         if (Tools::getIsset('p')) {
             $page = " (".Tools::getValue('p').")";
         }
@@ -1501,7 +1525,7 @@ class PiwikAnalyticsJs extends Module
      *
      * @throws PrestaShopException
      */
-    private function getConfigFields($form = false)
+    protected function getConfigFields($form = false)
     {
         $fields = [
             static::USE_PROXY        => 0,
@@ -1564,5 +1588,46 @@ class PiwikAnalyticsJs extends Module
         }
 
         return false;
+    }
+
+    /**
+     * get category names by product id
+     *
+     * @param int  $id    product id
+     * @param bool $array get categories as PHP array (TRUE), or javacript (FAlSE)
+     *
+     * @return string|array
+     * @throws PrestaShopDatabaseException
+     * @throws PrestaShopException
+     */
+    protected function getCategoryNamesByProduct($id, $array = true)
+    {
+        $_categories = Product::getProductCategoriesFull($id, $this->context->cookie->id_lang);
+        if (!is_array($_categories)) {
+            return $array ? [] : '[]';
+        }
+        if ($array) {
+            $categories = [];
+            foreach ($_categories as $category) {
+                $categories[] = $category['name'];
+                if (count($categories) == 5) {
+                    break;
+                }
+            }
+        } else {
+            $categories = '[';
+            $c = 0;
+            foreach ($_categories as $category) {
+                $c++;
+                $categories .= '"'.$category['name'].'",';
+                if ($c == 5) {
+                    break;
+                }
+            }
+            $categories = rtrim($categories, ',');
+            $categories .= ']';
+        }
+
+        return $categories;
     }
 }
