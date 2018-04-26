@@ -83,7 +83,7 @@ class PiwikAnalyticsJSPiwikModuleFrontController extends ModuleFrontController
                 PKHelper::debugLogger("\t: {$matomoUrl}piwik.js");
                 $exHeaders = [sprintf("Accept-Language: %s\r\n", @str_replace(["\n", "\t", "\r"], "", $this->arrayValue($_SERVER, 'HTTP_ACCEPT_LANGUAGE', '')))];
                 PKHelper::debugLogger("\t: Extra heders\n".str_repeat('==', 50)."\n".print_r($exHeaders, true)."\n".str_repeat('==', 50));
-                if ($piwikJs = PKHelper::get_http($matomoUrl.'piwik.js', $exHeaders)) {
+                if ($piwikJs = PKHelper::getHttp($matomoUrl.'piwik.js', $exHeaders)) {
                     PKHelper::debugLogger('Send Piwik js to client');
                     die($piwikJs);
                 } else {
@@ -111,7 +111,7 @@ class PiwikAnalyticsJSPiwikModuleFrontController extends ModuleFrontController
         PKHelper::debugLogger('Send request to Piwik ::: '.$url.(version_compare(PHP_VERSION, '5.3.0', '<') ? '&send_image=1' /* PHP 5.2 force returning */ : ''));
 
         $this->sendHeader("Content-Type: image/gif");
-        $content = PKHelper::get_http($url.(version_compare(PHP_VERSION, '5.3.0', '<') ? '&send_image=1' /* PHP 5.2 force returning */ : ''), [sprintf("Accept-Language: %s\r\n", @str_replace(["\n", "\t", "\r"], "", $this->arrayValue($_SERVER, 'HTTP_ACCEPT_LANGUAGE', '')))]);
+        $content = PKHelper::getHttp($url.(version_compare(PHP_VERSION, '5.3.0', '<') ? '&send_image=1' /* PHP 5.2 force returning */ : ''), [sprintf("Accept-Language: %s\r\n", @str_replace(["\n", "\t", "\r"], "", $this->arrayValue($_SERVER, 'HTTP_ACCEPT_LANGUAGE', '')))]);
 
         PKHelper::debugLogger('Piwik request complete');
         // Forward the HTTP response code

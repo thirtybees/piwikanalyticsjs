@@ -24,6 +24,10 @@
  * @license    http://www.gnu.org/licenses/gpl-3.0.html GPL v3 or later
  */
 
+use GuzzleHttp\Client;
+use GuzzleHttp\Exception\RequestException;
+use GuzzleHttp\Exception\TransferException;
+
 if (!defined('_TB_VERSION_')) {
     exit;
 }
@@ -307,12 +311,12 @@ class PKHelper
         $url = static::getBaseURL(0, null, null, 'API', null, '');
         $url .= "&method=UsersManager.getTokenAuth&userLogin={$userLogin}&md5Password={$password}&format=JSON";
         if ($result = static::getAsJsonDecoded($url)) {
-            if (isset($result->result)) {
-                static::$error = $result->message;
+            if (isset($result['result'])) {
+                static::$error = $result['message'];
                 static::$errors[] = static::$error;
             }
 
-            return isset($result->value) ? $result->value : false;
+            return isset($result['value']) ? $result['value'] : false;
         } else {
             return false;
         }
@@ -348,7 +352,7 @@ class PKHelper
             }
         }
         if (static::$_cachedResults[$md5Url] !== false) {
-            $ret['default'] = htmlentities('<noscript>'.static::$_cachedResults[$md5Url]->value.'</noscript>');
+            $ret['default'] = htmlentities('<noscript>'.static::$_cachedResults[$md5Url]['value'].'</noscript>');
             if ((bool) Configuration::get('PS_REWRITING_SETTINGS')) {
                 $ret['proxy'] = str_replace(
                     Configuration::get(PiwikAnalyticsJs::HOST).'piwik.php',
@@ -369,6 +373,8 @@ class PKHelper
 
     /**
      * get Piwik site based on the current settings in the configuration
+     *
+     * @param int $idSite
      *
      * @return stdClass[]|false
      *
@@ -394,8 +400,8 @@ class PKHelper
             }
         }
         if (static::$_cachedResults[$md5Url] !== false) {
-            if (isset(static::$_cachedResults[$md5Url]->result) && static::$_cachedResults[$md5Url]->result == 'error') {
-                static::$error = static::$_cachedResults[$md5Url]->message;
+            if (isset(static::$_cachedResults[$md5Url]['result']) && static::$_cachedResults[$md5Url]['result'] === 'error') {
+                static::$error = static::$_cachedResults[$md5Url]['message'];
                 static::$errors[] = static::$error;
 
                 return false;
@@ -403,12 +409,12 @@ class PKHelper
             if (!isset(static::$_cachedResults[$md5Url][0])) {
                 return false;
             }
-            if ((bool) static::$_cachedResults[$md5Url][0]->ecommerce === false || static::$_cachedResults[$md5Url][0]->ecommerce == 0) {
-                static::$error = static::l('E-commerce is not active for your site in piwik!, you can enable it in the advanced settings on this page');
+            if ((bool) static::$_cachedResults[$md5Url][0]['ecommerce'] === false || static::$_cachedResults[$md5Url][0]['ecommerce'] == 0) {
+                static::$error = static::l('E-commerce is not active for your site in Matomo!, you can enable it in the advanced settings on this page');
                 static::$errors[] = static::$error;
             }
-            if ((bool) static::$_cachedResults[$md5Url][0]->sitesearch === false || static::$_cachedResults[$md5Url][0]->sitesearch == 0) {
-                static::$error = static::l('Site search is not active for your site in piwik!, you can enable it in the advanced settings on this page');
+            if ((bool) static::$_cachedResults[$md5Url][0]['sitesearch'] === false || static::$_cachedResults[$md5Url][0]['sitesearch'] == 0) {
+                static::$error = static::l('Site search is not active for your site in Matomo!, you can enable it in the advanced settings on this page');
                 static::$errors[] = static::$error;
             }
 
@@ -418,6 +424,12 @@ class PKHelper
         return false;
     }
 
+    /**
+     * @param int $idSite
+     *
+     * @return bool|false|stdClass[]
+     * @throws PrestaShopException
+     */
     public static function getPiwikSite2($idSite = 0)
     {
         if ($idSite == 0) {
@@ -427,7 +439,7 @@ class PKHelper
             $url = static::getBaseURL($idSite);
             $url .= "&method=SitesManager.getSiteUrlsFromId&format=JSON";
             if ($resultUrls = static::getAsJsonDecoded($url)) {
-                $result[0]->main_url = implode(',', $resultUrls);
+                $result[0]['main_url'] = implode(',', $resultUrls);
             }
 
             return $result;
@@ -628,9 +640,9 @@ class PKHelper
      */
     protected static function getAsJsonDecoded($url)
     {
-        $getF = static::get_http($url);
+        $getF = static::getHttp($url);
         if ($getF !== false) {
-            return json_decode($getF);
+            return json_decode($getF, true);
         }
 
         return false;
@@ -643,7 +655,7 @@ class PKHelper
      * @return bool|mixed|string
      * @throws PrestaShopException
      */
-    public static function get_http($url, $headers = [])
+    public static function getHttp($url, $headers = [])
     {
         static $_error2 = false;
         PKHelper::debugLogger('START: PKHelper::get_http('.$url.','.print_r($headers, true).')');
@@ -665,39 +677,46 @@ class PKHelper
         if ((!empty($httpauth_usr) && !is_null($httpauth_usr) && $httpauth_usr !== false) && (!empty($httpauth_pwd) && !is_null($httpauth_pwd) && $httpauth_pwd !== false)) {
             $httpauth = "Authorization: Basic ".base64_encode("$httpauth_usr:$httpauth_pwd")."\r\n";
         }
-        $options = [
-            'http' => [
-                'user_agent' => (isset($_SERVER['HTTP_USER_AGENT']) ? $_SERVER['HTTP_USER_AGENT'] : PKHelper::FAKEUSERAGENT),
-                'method'     => "GET",
-                'timeout'    => $timeout,
-                'header'     => (!empty($headers) ? implode('', $headers) : "Accept-language: {$lng}\r\n").$httpauth,
-            ],
-        ];
-        $context = stream_context_create($options);
+        $headers = (!empty($headers) ? implode('', $headers) : "Accept-language: {$lng}\r\n").$httpauth;
+        $headers .= 'User-Agent:'.(isset($_SERVER['HTTP_USER_AGENT']) ? $_SERVER['HTTP_USER_AGENT'] : PKHelper::FAKEUSERAGENT);
+        $newHeaders = [];
+        foreach (explode("\r\n", $headers) as $header) {
+            $headersParts = array_map('trim', array_pad(explode(':', $header), 2, ''));
+            $newHeaders[$headersParts[0]] = $headersParts[1];
+        }
+        $guzzle = new Client([
+            'verify'          => _PS_TOOL_DIR_.'cacert.pem',
+            'timeout'         => (int) $timeout,
+            'connect_timeout' => (int) $timeout,
+            'headers'         => $newHeaders,
+        ]);
         PKHelper::debugLogger('Calling: '.$url.(!empty($httpauth) ? "\n\t- With Http auth" : ""));
-        $result = @file_get_contents($url, false, $context);
-        if ($result === false) {
-            $http_response = "";
-            if (isset($http_response_header) && is_array($http_response_header)) {
-                foreach ($http_response_header as $value) {
-                    if (preg_match("/^HTTP\/.*/i", $value)) {
-                        $http_response = ':'.$value;
-                    }
-                }
+        try {
+            $result = (string) $guzzle->get($url)->getBody();
+        } catch (RequestException $e) {
+            $response = (string) $e->getResponse()->getBody();
+            PKHelper::debugLogger("request returned ERROR: http response: {$response}.");
+            $headerString = '';
+            foreach ($e->getResponse()->getHeaders() as $key => $header) {
+                $headerString .= "$key:$header\r\n";
             }
-            PKHelper::debugLogger('request returned ERROR: http response: '.$http_response);
-            if (isset($http_response_header)) {
-                PKHelper::debugLogger('$http_response_header: '.print_r($http_response_header, true));
-            }
+            PKHelper::debugLogger("$http_response_header: {$headerString}");
             if (!$_error2) {
-                static::$error = sprintf(static::l('Unable to connect to the API%s'), " {$http_response}");
+                static::$error = sprintf(static::l('Unable to connect to the API%s'), " {$response}");
                 static::$errors[] = static::$error;
                 $_error2 = true;
                 PKHelper::debugLogger('Last error message: '.static::$error);
             }
-        } else {
-            PKHelper::debugLogger('request returned OK');
+            return false;
+        } catch (TransferException $e) {
+            PKHelper::debugLogger("request returned ERROR: http response: {$e->getMessage()}");
+            return false;
+        } catch (Exception $e) {
+            PKHelper::debugLogger("request returned ERROR: http response: {$e->getMessage()}");
+            return false;
         }
+
+        PKHelper::debugLogger('request returned OK');
         PKHelper::debugLogger('END: PKHelper::get_http(): OK');
 
         return $result;
@@ -714,11 +733,11 @@ class PKHelper
         return Translate::getModuleTranslation('piwikanalyticsjs', $string, ($specific) ? $specific : 'pkhelper');
         // the following lines are need for the translation to work properly
         // $this->l('I need Site ID and Auth Token before i can get your image tracking code')
-        // $this->l('E-commerce is not active for your site in piwik!, you can enable it in the advanced settings on this page')
-        // $this->l('Site search is not active for your site in piwik!, you can enable it in the advanced settings on this page')
+        // $this->l('E-commerce is not active for your site in Matomo!, you can enable it in the advanced settings on this page')
+        // $this->l('Site search is not active for your site in Matomo!, you can enable it in the advanced settings on this page')
         // $this->l('Unable to connect to api %s')
-        // $this->l('E-commerce is not active for your site in piwik!')
-        // $this->l('Site search is not active for your site in piwik!')
+        // $this->l('E-commerce is not active for your site in Matomo!')
+        // $this->l('Site search is not active for your site in Matomo!')
         // $this->l('A password is required for method PKHelper::getTokenAuth()!')
     }
 }

@@ -61,7 +61,7 @@ class PiwikAnalyticsController extends ModuleAdminController
         $this->addToolBarModulesListButton();
         $this->toolbar_title = $this->l('Stats', 'PiwikAnalytics');
         $this->initPageHeaderToolbar();
-        $http = ((bool) Configuration::get('PIWIK_CRHTTPS') ? 'https://' : 'http://');
+        $http = Tools::getShopProtocol();
         $PIWIK_HOST = Configuration::get('PIWIK_HOST');
         $PIWIK_SITEID = (int) Configuration::get('PIWIK_SITEID');
 
@@ -73,13 +73,13 @@ class PiwikAnalyticsController extends ModuleAdminController
         if ((!empty($user) && $user !== false) && (!empty($passwd) && $passwd !== false)) {
             $this->page_header_toolbar_btn['stats'] = [
                 'href'   => $http.$PIWIK_HOST.'index.php?module=Login&action=logme&login='.$user.'&password='.md5($passwd).'&idSite='.$PIWIK_SITEID,
-                'desc'   => $this->l('Piwik'),
+                'desc'   => $this->l('Matomo'),
                 'target' => true,
             ];
         } else {
             $this->page_header_toolbar_btn['stats'] = [
                 'href'   => $http.$PIWIK_HOST.'index.php',
-                'desc'   => $this->l('Piwik'),
+                'desc'   => $this->l('Matomo'),
                 'target' => true,
             ];
         }

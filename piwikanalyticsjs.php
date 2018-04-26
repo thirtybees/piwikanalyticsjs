@@ -197,8 +197,8 @@ class PiwikAnalyticsJs extends Module
             $fieldsForm[0]['form']['input'][] = [
                 'type' => 'html',
                 'name' => $this->l('Based on the settings you provided this is the info i get from Piwik!')."<br>"
-                    ."<strong>".$this->l('Name')."</strong>: <i>{$this->matomoSite[0]->name}</i><br>"
-                    ."<strong>".$this->l('Main Url')."</strong>: <i>{$this->matomoSite[0]->main_url}</i><br>"
+                    ."<strong>".$this->l('Name')."</strong>: <i>{$this->matomoSite[0]['name']}</i><br>"
+                    ."<strong>".$this->l('Main Url')."</strong>: <i>{$this->matomoSite[0]['main_url']}</i><br>"
                     ."<a href='#' onclick='return PiwikLookup();' title='{$this->l('Click here to open piwik site lookup wizard')}'>{$this->l('Configuration Wizard')}</a>",
             ];
         } else {
@@ -343,7 +343,7 @@ class PiwikAnalyticsJs extends Module
             'type'    => 'select',
             'label'   => $this->l('Matomo Currency'),
             'name'    => static::DEFAULT_CURRENCY,
-            'desc'    => sprintf($this->l('Based on your settings in Matomo your default currency is %s'), ($this->matomoSite !== false ? $this->matomoSite[0]->currency : $this->l('unknown'))),
+            'desc'    => sprintf($this->l('Based on your settings in Matomo your default currency is %s'), ($this->matomoSite !== false ? $this->matomoSite[0]['currency'] : $this->l('unknown'))),
             'options' => [
                 'default' => ['value' => 0, 'label' => $this->l('Choose currency')],
                 'query'   => array_map(function ($currency) {
@@ -534,8 +534,8 @@ class PiwikAnalyticsJs extends Module
             $pksites = [];
             foreach ($tmp as $pksid) {
                 $pksites[] = [
-                    'pkid' => $pksid->idsite,
-                    'name' => "{$pksid->name} #{$pksid->idsite}",
+                    'pkid' => $pksid['idsite'],
+                    'name' => "{$pksid['name']} #{$pksid['idsite']}",
                 ];
             }
             unset($tmp, $pksid);
@@ -575,7 +575,7 @@ class PiwikAnalyticsJs extends Module
                         'type'     => 'select',
                         'label'    => $this->l('Matomo Site'),
                         'name'     => 'SPKSID',
-                        'desc'     => sprintf($this->l('Based on your settings in Matomo your default site is %s'), $this->matomoSite[0]->idsite),
+                        'desc'     => sprintf($this->l('Based on your settings in Matomo your default site is %s'), $this->matomoSite[0]['idsite']),
                         'options'  => [
                             'default' => $pksite_default,
                             'query'   => $pksites,
@@ -587,14 +587,14 @@ class PiwikAnalyticsJs extends Module
                     [
                         'type' => 'html',
                         'name' => $this->l('In this section you can modify your settings in Matomo just so you don\'t have to login to Matomo to do this')."<br>"
-                            ."<strong>".$this->l('Currently selected name')."</strong>: <i id='wnamedsting'>{$this->matomoSite[0]->name}</i><br>"
-                            ."<input type=\"hidden\" name=\"PKAdminIdSite\" id=\"PKAdminIdSite\" value=\"{$this->matomoSite[0]->idsite}\" />",
+                            ."<strong>".$this->l('Currently selected name')."</strong>: <i id='wnamedsting'>{$this->matomoSite[0]['name']}</i><br>"
+                            ."<input type=\"hidden\" name=\"PKAdminIdSite\" id=\"PKAdminIdSite\" value=\"{$this->matomoSite[0]['idsite']}\" />",
                     ],
                     [
                         'type'  => 'text',
-                        'label' => $this->l('Piwik Site Name'),
+                        'label' => $this->l('Matomo Site Name'),
                         'name'  => 'PKAdminSiteName',
-                        'desc'  => $this->l('Name of this site in Piwik'),
+                        'desc'  => $this->l('Name of this site in Matomo'),
                     ],
                     //                    array(
                     //                        'type' => 'text',
@@ -664,7 +664,7 @@ class PiwikAnalyticsJs extends Module
                         'type'    => 'select',
                         'label'   => $this->l('Timezone'),
                         'name'    => 'PKAdminTimezone',
-                        'desc'    => sprintf($this->l('Based on your settings in Matomo your default timezone is %s'), $this->matomoSite[0]->timezone),
+                        'desc'    => sprintf($this->l('Based on your settings in Matomo your default timezone is %s'), $this->matomoSite[0]['timezone']),
                         'options' => [
                             'default'     => $pktimezone_default,
                             'optiongroup' => [
@@ -682,7 +682,7 @@ class PiwikAnalyticsJs extends Module
                         'type'    => 'select',
                         'label'   => $this->l('Currency'),
                         'name'    => 'PKAdminCurrency',
-                        'desc'    => sprintf($this->l('Based on your settings in Matomo your default currency is %s'), $this->matomoSite[0]->currency),
+                        'desc'    => sprintf($this->l('Based on your settings in Matomo your default currency is %s'), $this->matomoSite[0]['currency']),
                         'options' => [
                             'default' => ['value' => 0, 'label' => $this->l('Choose currency')],
                             'query'   => array_map(function ($currency) {
@@ -979,22 +979,22 @@ class PiwikAnalyticsJs extends Module
             static::PAUTHPWD                  => Configuration::get(static::PAUTHPWD),
             static::DREPDATE                  => Configuration::get(static::DREPDATE),
             /* stuff thats isset by ajax calls to Piwik API ---(here to avoid not isset warnings..!)--- */
-            'PKAdminSiteName'                 => ($this->matomoSite !== false ? $this->matomoSite[0]->name : ''),
-            'PKAdminEcommerce'                => ($this->matomoSite !== false ? $this->matomoSite[0]->ecommerce : ''),
-            'PKAdminSiteSearch'               => ($this->matomoSite !== false ? $this->matomoSite[0]->sitesearch : ''),
-            'PKAdminSearchKeywordParameters'  => ($this->matomoSite !== false ? $this->matomoSite[0]->sitesearch_keyword_parameters : ''),
-            'PKAdminSearchCategoryParameters' => ($this->matomoSite !== false ? $this->matomoSite[0]->sitesearch_category_parameters : ''),
-            'SPKSID'                          => ($this->matomoSite !== false ? $this->matomoSite[0]->idsite : Configuration::get(static::SITEID)),
-            'PKAdminExcludedIps'              => ($this->matomoSite !== false ? $this->matomoSite[0]->excluded_ips : ''),
-            'PKAdminExcludedQueryParameters'  => ($this->matomoSite !== false ? $this->matomoSite[0]->excluded_parameters : ''),
-            'PKAdminTimezone'                 => ($this->matomoSite !== false ? $this->matomoSite[0]->timezone : ''),
-            'PKAdminCurrency'                 => ($this->matomoSite !== false ? $this->matomoSite[0]->currency : ''),
-            'PKAdminGroup'                    => ($this->matomoSite !== false ? $this->matomoSite[0]->group : ''),
+            'PKAdminSiteName'                 => ($this->matomoSite !== false ? $this->matomoSite[0]['name'] : ''),
+            'PKAdminEcommerce'                => ($this->matomoSite !== false ? $this->matomoSite[0]['ecommerce'] : ''),
+            'PKAdminSiteSearch'               => ($this->matomoSite !== false ? $this->matomoSite[0]['sitesearch'] : ''),
+            'PKAdminSearchKeywordParameters'  => ($this->matomoSite !== false ? $this->matomoSite[0]['sitesearch_keyword_parameters'] : ''),
+            'PKAdminSearchCategoryParameters' => ($this->matomoSite !== false ? $this->matomoSite[0]['sitesearch_category_parameters'] : ''),
+            'SPKSID'                          => ($this->matomoSite !== false ? $this->matomoSite[0]['idsite'] : Configuration::get(static::SITEID)),
+            'PKAdminExcludedIps'              => ($this->matomoSite !== false ? $this->matomoSite[0]['excluded_ips'] : ''),
+            'PKAdminExcludedQueryParameters'  => ($this->matomoSite !== false ? $this->matomoSite[0]['excluded_parameters'] : ''),
+            'PKAdminTimezone'                 => ($this->matomoSite !== false ? $this->matomoSite[0]['timezone'] : ''),
+            'PKAdminCurrency'                 => ($this->matomoSite !== false ? $this->matomoSite[0]['currency'] : ''),
+            'PKAdminGroup'                    => ($this->matomoSite !== false ? $this->matomoSite[0]['group'] : ''),
             'PKAdminStartDate'                => '',
             'PKAdminSiteUrls'                 => '',
-            'PKAdminExcludedUserAgents'       => ($this->matomoSite !== false ? $this->matomoSite[0]->excluded_user_agents : ''),
-            'PKAdminKeepURLFragments'         => ($this->matomoSite !== false ? $this->matomoSite[0]->keep_url_fragment : 0),
-            'PKAdminSiteType'                 => ($this->matomoSite !== false ? $this->matomoSite[0]->type : 'website'),
+            'PKAdminExcludedUserAgents'       => ($this->matomoSite !== false ? $this->matomoSite[0]['excluded_user_agents'] : ''),
+            'PKAdminKeepURLFragments'         => ($this->matomoSite !== false ? $this->matomoSite[0]['keep_url_fragment'] : 0),
+            'PKAdminSiteType'                 => ($this->matomoSite !== false ? $this->matomoSite[0]['type'] : 'website'),
         ];
     }
 
