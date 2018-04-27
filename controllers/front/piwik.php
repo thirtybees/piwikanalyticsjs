@@ -125,7 +125,7 @@ class PiwikAnalyticsJSPiwikModuleFrontController extends ModuleFrontController
     }
 
     /**
-     * @return null
+     * @return string|null
      */
     protected function getVisitIp()
     {
@@ -144,8 +144,32 @@ class PiwikAnalyticsJSPiwikModuleFrontController extends ModuleFrontController
         return !empty($_SERVER['REMOTE_ADDR']) ? $_SERVER['REMOTE_ADDR'] : null;
     }
 
+    /**
+     * @param string $header
+     * @param bool   $replace
+     */
     protected function sendHeader($header, $replace = true)
     {
-        headers_sent() || header($header, $replace);
+        if (!headers_sent()) {
+            header($header, $replace);
+        };
+    }
+
+    /**
+     * Get array value
+     *
+     * @param array  $array
+     * @param string $key
+     * @param mixed  $value
+     *
+     * @return mixed
+     */
+    protected function arrayValue($array, $key, $value = null)
+    {
+        if (!empty($array[$key])) {
+            $value = $array[$key];
+        }
+
+        return $value;
     }
 }
