@@ -25,6 +25,7 @@
  */
 
 use GuzzleHttp\Client;
+use GuzzleHttp\Exception\ClientException;
 use GuzzleHttp\Exception\RequestException;
 use GuzzleHttp\Exception\TransferException;
 
@@ -584,14 +585,14 @@ class PKHelper
             $https = (bool) Configuration::get(PiwikAnalyticsJs::CRHTTPS);
         }
 
-
-        if (static::$piwikHost == "" || static::$piwikHost === false) {
+        if (static::$piwikHost == '' || static::$piwikHost === false) {
             static::$piwikHost = Configuration::get(PiwikAnalyticsJs::HOST);
         }
 
         if ($pkHost === null) {
             $pkHost = static::$piwikHost;
         }
+        $pkHost = rtrim($pkHost, '/').'/';
         if ($isoCode === null) {
             $isoCode = strtolower((isset(Context::getContext()->language->iso_code) ? Context::getContext()->language->iso_code : 'en'));
         }
@@ -693,7 +694,7 @@ class PKHelper
         PKHelper::debugLogger('Calling: '.$url.(!empty($httpauth) ? "\n\t- With Http auth" : ""));
         try {
             $result = (string) $guzzle->get($url)->getBody();
-        } catch (RequestException $e) {
+        } catch (ClientException $e) {
             $response = (string) $e->getResponse()->getBody();
             PKHelper::debugLogger("request returned ERROR: http response: {$response}.");
             $headerString = '';

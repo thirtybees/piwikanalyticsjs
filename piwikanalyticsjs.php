@@ -111,10 +111,10 @@ class PiwikAnalyticsJs extends Module
             $warnings[] = $this->l('is not ready to roll you need to configure the auth token');
         }
         if ($this->id && !Configuration::get(static::SITEID)) {
-            $warnings[] = $this->l('You have not yet set Piwik Site ID');
+            $warnings[] = $this->l('You have not yet set your Matomo Site ID');
         }
         if ($this->id && !Configuration::get(static::HOST)) {
-            $warnings[] = $this->l('is not ready to roll. You need to configure the Piwik server URL');
+            $warnings[] = $this->l('is not ready to roll. You need to configure the Matomo server URL');
         }
         $this->warning = implode('<br>', $warnings);
 
@@ -187,6 +187,21 @@ class PiwikAnalyticsJs extends Module
         $helper->title = $this->displayName;
         $helper->submit_action = "submitUpdate{$this->name}";
 
+        if (Configuration::get(static::TOKEN_AUTH)) {
+            $imageTracking = PKHelper::getPiwikImageTrackingCode();
+        } else {
+            $imageTracking = [
+                'default' => $this->l('I need your Site ID and Auth Token before I can grab your image tracking code'),
+                'proxy'   => $this->l('I need your Site ID and Auth Token before I can grab your image tracking code'),
+            ];
+        }
+        $this->context->smarty->assign([
+            'matomoSiteName' => isset($this->matomoSite[0]['name']) ? $this->matomoSite[0]['name'] : '',
+            'matomoSiteId'   => isset($this->matomoSite[0]['idsite']) ? $this->matomoSite[0]['idsite'] : '',
+            'matomoSiteUrl'  => isset($this->matomoSite[0]['main_url']) ? $this->matomoSite[0]['main_url'] : '',
+            'imageTracking'  => $imageTracking,
+        ]);
+
         $fieldsForm[0]['form']['legend'] = [
             'title'  => $this->displayName,
             'image'  => $this->_path.'logo.gif',
@@ -197,15 +212,12 @@ class PiwikAnalyticsJs extends Module
         if ($this->matomoSite !== false) {
             $fieldsForm[0]['form']['input'][] = [
                 'type' => 'html',
-                'name' => $this->l('Based on the settings you provided this is the info I get from Matomo!')."<br>"
-                    ."<strong>".$this->l('Name')."</strong>: <i>{$this->matomoSite[0]['name']}</i><br>"
-                    ."<strong>".$this->l('Main Url')."</strong>: <i>{$this->matomoSite[0]['main_url']}</i><br>"
-                    ."<a href='#' onclick='return PiwikLookup();' title='{$this->l('Click here to open the Matomo site lookup wizard')}'>{$this->l('Configuration Wizard')}</a>",
+                'name' => $this->display(__FILE__, 'views/templates/admin/desc_site_wizard.tpl'),
             ];
         } else {
             $fieldsForm[0]['form']['input'][] = [
                 'type' => 'html',
-                'name' => "<a href='#' onclick='return PiwikLookup();' title='{$this->l('Click here to open the Matomo site lookup wizard')}'>{$this->l('Configuration Wizard')}</a>",
+                'name' => $this->display(__FILE__, 'views/templates/admin/desc_site_wizard.tpl'),
             ];
         }
 
@@ -304,15 +316,6 @@ class PiwikAnalyticsJs extends Module
             ],
         ];
 
-        if (!Configuration::get(static::TOKEN_AUTH)) {
-            $imageTracking = PKHelper::getPiwikImageTrackingCode();
-        } else {
-            $imageTracking = [
-                'default' => $this->l('I need your Site ID and Auth Token before I can grab your image tracking code'),
-                'proxy'   => $this->l('I need your Site ID and Auth Token before I can grab your image tracking code'),
-            ];
-        }
-
         foreach (PKHelper::$errors as $error) {
             $this->context->controller->errors[] = $error;
         }
@@ -321,9 +324,7 @@ class PiwikAnalyticsJs extends Module
 
         $fieldsForm[0]['form']['input'][] = [
             'type' => 'html',
-            'name' => $this->l('Matomo image tracking code append one of them to field "Extra HTML" this will add images tracking code to all your pages')."<br>"
-                ."<strong>".$this->l('default')."</strong>:<br /><i>{$imageTracking['default']}</i><br>"
-                ."<strong>".$this->l('using proxy script')."</strong>:<br /><i>{$imageTracking['proxy']}</i><br>",
+            'name' => $this->display(__FILE__, 'views/templates/admin/desc_image_tracking.tpl'),
         ];
         $fieldsForm[0]['form']['input'][] = [
             'type'                      => 'code',
@@ -436,17 +437,7 @@ class PiwikAnalyticsJs extends Module
                 ],
                 [
                     'type' => 'html',
-                    'name' => $this->l('in the next few inputs you can set how the product id is passed on to Matomo')
-                        .'<br />'
-                        .$this->l('there are three variables you can use:')
-                        .'<br />'
-                        .'<kbd>{ID}</kbd>: '.$this->l('this variable is replaced with id the product has in thirty bees')
-                        .'<br />'
-                        .'<kbd>{REFERENCE}</kbd>: '.$this->l('this variable is replaced with the unique reference you when adding adding/updating a product')
-                        .'<br />'
-                        .'<kbd>{ATTRID}</kbd>: '.$this->l('this variable is replaced with id the product attribute')
-                        .'<br />'
-                        .$this->l('in cases where only the product id is available it be parsed as ID and nothing else'),
+                    'name' => $this->display(__FILE__, 'views/templates/admin/desc_product_variants.tpl'),
                 ],
                 [
                     'type'     => 'text',
@@ -471,7 +462,7 @@ class PiwikAnalyticsJs extends Module
                 ],
                 [
                     'type' => 'html',
-                    'name' => "<strong>{$this->l('Matomo Cookies')}</strong>",
+                    'name' => $this->display(__FILE__, 'views/templates/admin/desc_cookies.tpl'),
                 ],
                 [
                     'type'     => 'text',
@@ -499,7 +490,7 @@ class PiwikAnalyticsJs extends Module
                 ],
                 [
                     'type' => 'html',
-                    'name' => "<strong>{$this->l('Matomo Proxy Script Authorization? If Matomo is installed behind HTTP Basic Authorization (Both password and username must be filled before the values will be used)')}</strong>",
+                    'name' => $this->display(__FILE__, 'views/templates/admin/desc_basic_auth.tpl'),
                 ],
                 [
                     'type'         => 'text',
@@ -588,9 +579,7 @@ class PiwikAnalyticsJs extends Module
                     ],
                     [
                         'type' => 'html',
-                        'name' => $this->l('In this section you can modify your settings in Matomo just so you don\'t have to login to Matomo to do this')."<br>"
-                            ."<strong>".$this->l('Currently selected name')."</strong>: <i id='wnamedsting'>{$this->matomoSite[0]['name']}</i><br>"
-                            ."<input type=\"hidden\" name=\"PKAdminIdSite\" id=\"PKAdminIdSite\" value=\"{$this->matomoSite[0]['idsite']}\" />",
+                        'name' => $this->display(__FILE__, 'views/templates/admin/desc_embed.tpl'),
                     ],
                     [
                         'type'  => 'text',
@@ -765,6 +754,9 @@ class PiwikAnalyticsJs extends Module
             .$this->display(__FILE__, 'views/templates/admin/piwik_site_lookup.tpl');
     }
 
+    /**
+     * @return void
+     */
     protected function __pkapicall()
     {
         $apiMethod = Tools::getValue('pkapicall');
@@ -775,7 +767,10 @@ class PiwikAnalyticsJs extends Module
             foreach ($required as $requiredOption) {
                 if (!Tools::getIsset($requiredOption)) {
                     PKHelper::debugLogger("__pkapicall():\n\t- Required parameter \"".$requiredOption.'" is missing');
-                    die(json_encode(['error' => true, 'message' => sprintf($this->l('Required parameter "%s" is missing'), $requiredOption)]));
+                    die(json_encode([
+                        'error' => true,
+                        'message' => sprintf($this->l('Required parameter "%s" is missing'), $requiredOption),
+                    ]));
                 }
             }
             foreach ($order as & $value) {
@@ -803,9 +798,12 @@ class PiwikAnalyticsJs extends Module
                 if (!empty(PKHelper::$errors)) {
                     $lastError = "\n".PKHelper::$error;
                 }
-                die(json_encode(['error' => true, 'message' => sprintf($this->l('Unknown error occurred%s'), $lastError)]));
+                die(json_encode([
+                    'error' => true,
+                    'message' => sprintf($this->l('Unknown error occurred%s'), $lastError),
+                ]));
             } else {
-                PKHelper::debugLogger("__pkapicall():\n\t- Al good");
+                PKHelper::debugLogger("__pkapicall():\n\t- All good");
                 if (is_array($result) && isset($result[0])) {
                     $message = $result;
                 } else {
