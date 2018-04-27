@@ -399,10 +399,12 @@ class PiwikAnalyticsJs extends Module
             'class'        => 'fixed-width-xxl',
         ];
 
-        $fieldsForm[0]['form']['submit'] = [
+        $fieldsForm[0]['form']['buttons'] = ['submit' => [
             'title' => $this->l('Save'),
             'class' => 'btn btn-default pull-right',
-        ];
+            'icon'  => 'process-icon-save',
+            'js'    => 'return submitPiwikSiteAPIUpdate(event, false)',
+        ]];
 
         $fieldsForm[1]['form'] = [
             'legend'      => [
@@ -509,10 +511,14 @@ class PiwikAnalyticsJs extends Module
                     'class'        => 'fixed-width-xxl',
                 ],
             ],
-            'submit' => [
-                'title' => $this->l('Save'),
-                'class' => 'btn btn-default pull-right',
-            ],
+            'buttons' => [
+                'submit' => [
+                    'title' => $this->l('Save'),
+                    'class' => 'btn btn-default pull-right',
+                    'icon'  => 'process-icon-save',
+                    'js'    => 'return submitPiwikSiteAPIUpdate(event, false)',
+                ],
+            ]
         ];
 
         if ($this->matomoSite !== false) {
@@ -730,7 +736,7 @@ class PiwikAnalyticsJs extends Module
                         'name'  => 'submitUpdatePiwikAdmSite',
                         'class' => 'btn btn-default pull-right',
                         'icon'  => 'process-icon-save',
-                        'js'    => 'return submitPiwikSiteAPIUpdate()',
+                        'js'    => 'return submitPiwikSiteAPIUpdate(event, true)',
                     ],
                 ],
             ];

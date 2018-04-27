@@ -22,7 +22,10 @@
  * PrestaShop is an internationally registered trademark & property of PrestaShop SA
 *}
 <script type="text/javascript">
-  function submitPiwikSiteAPIUpdate() {
+  function submitPiwikSiteAPIUpdate(event, submitAll) {
+    if (event && typeof event.preventDefault === 'function') {
+      event.preventDefault();
+    }
     var ajaxes = [];
     if ($('#fieldset_2_2').is(':visible')) {
       var idSite = $('#PKAdminIdSite').val();
@@ -80,33 +83,38 @@
       }));
     }
 
-    if (typeof FormData !== 'undefined') {
-      var formData = new FormData(document.getElementById('configuration_form'));
-      formData.append('configuration_form_submit_btn', '1');
-      formData.append('submitUpdatepiwikanalyticsjs', '1');
-      ajaxes.push($.ajax({
-        type: 'POST',
-        url: '{$psm_currentIndex|escape:'javascript'}&token={$psm_token|escape:'javascript'}',
-        processData: false,
-        dataType: false,
-        contentType: false,
-        data: formData,
-      }));
-    } else {
-      $('#configuration_form_submit_btn').click();
-      return false;
+    if (submitAll) {
+      if (typeof FormData !== 'undefined') {
+        var formData = new FormData(document.getElementById('configuration_form'));
+        formData.append('configuration_form_submit_btn', '1');
+        formData.append('submitUpdatepiwikanalyticsjs', '1');
+        ajaxes.push($.ajax({
+          type: 'POST',
+          url: '{$psm_currentIndex|escape:'javascript'}&token={$psm_token|escape:'javascript'}',
+          processData: false,
+          dataType: false,
+          contentType: false,
+          data: formData,
+        }));
+      } else {
+        $('#configuration_form_submit_btn').click();
+        return false;
+      }
     }
 
     if (ajaxes.length) {
       $.when.apply($, ajaxes)
         .then(function (api) {
-          if (typeof FormData !== 'undefined') {
+          if (submitAll && typeof FormData !== 'undefined') {
             swal({
               icon: 'success',
               text: api[0].message
             });
           } else {
             $('#configuration_form_submit_btn').click();
+          }
+          if (!submitAll && event) {
+            $(event.target).closest('form').submit();
           }
         })
         .fail(function (api, config) {
