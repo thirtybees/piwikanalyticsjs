@@ -136,12 +136,12 @@ class PiwikAnalyticsJSPiwikModuleFrontController extends ModuleFrontController
             'HTTP_CF_CONNECTING_IP',
         ];
         foreach ($ipKeys as $ipKey) {
-            if (isset($_SERVER[$ipKey]) && preg_match($matchIp, $_SERVER[$ipKey])) {
-                return $_SERVER[$ipKey];
+            if (isset($_SERVER[$ipKey]) && preg_match($matchIp, explode(',', $this->arrayValue($_SERVER, $ipKey))[0])) {
+                return explode(',', $this->arrayValue($_SERVER, $ipKey))[0];
             }
         }
 
-        return !empty($_SERVER['REMOTE_ADDR']) ? $_SERVER['REMOTE_ADDR'] : null;
+        return $this->arrayValue($_SERVER, 'REMOTE_ADDR');
     }
 
     /**
