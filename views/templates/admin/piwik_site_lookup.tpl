@@ -163,6 +163,11 @@
                   type: 'POST',
                   url: (!https ? 'http://' : 'https://') + piwikhost + 'index.php?module=API&token_auth=' + authtoken + '&method=SitesManager.getSitesWithAdminAccess&format=JSON',
                   dataType: 'json',
+                  beforeSend: function (xhr) {
+                    if (httpUsername && httpPassword) {
+                      xhr.setRequestHeader('Authorization', 'Basic ' + btoa(httpUsername + ':' + httpPassword));
+                    }
+                  },
                   success: function (data) {
                     swal.close();
                     if (data.error === true) {
