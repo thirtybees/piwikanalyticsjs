@@ -131,6 +131,11 @@
           }
           piwikhost = piwikhost.replace("http://", "").replace("https://", "").replace("://", "").replace("//", "").replace(/\/+$/, '') + '/';
           $('#PIWIK_HOST').val(piwikhost);
+          if (https) {
+            $('input[name=PIWIK_CRHTTPS]')[0].checked = true;
+          } else {
+            $('input[name=PIWIK_CRHTTPS]')[1].checked = true;
+          }
 
           /* get auth token */
           $.ajax({
@@ -210,10 +215,12 @@
   function PiwikLookupSetSiteId(id) {
     $('#PIWIK_SITEID').val(id);
     PiwikLookup();
-    if ($('#_form_submit_btn').length > 0)
+    if ($('#_form_submit_btn').length > 0) {
       $('#_form_submit_btn').click();
-    if ($('#configuration_form_submit_btn').length > 0)
+    }
+    if ($('#configuration_form_submit_btn').length > 0) {
       $('#configuration_form_submit_btn').click();
+    }
   }
 
 </script>
