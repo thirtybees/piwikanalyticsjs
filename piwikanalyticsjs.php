@@ -114,7 +114,7 @@ class PiwikAnalyticsJs extends Module
             $warnings[] = $this->l('You have not yet set Piwik Site ID');
         }
         if ($this->id && !Configuration::get(static::HOST)) {
-            $warnings[] = $this->l('is not ready to roll you need to configure the Piwik server url');
+            $warnings[] = $this->l('is not ready to roll. You need to configure the Piwik server URL');
         }
         $this->warning = implode('<br>', $warnings);
 
@@ -136,6 +136,7 @@ class PiwikAnalyticsJs extends Module
             $this->__pkapicall();
             die();
         }
+        $this->context->controller->addJS($this->_path.'views/js/sweetalert-2.1.0.min.js');
 
         $this->context->controller->addJqueryPlugin('tagify', _PS_JS_DIR_.'jquery/plugins/');
 
@@ -196,15 +197,15 @@ class PiwikAnalyticsJs extends Module
         if ($this->matomoSite !== false) {
             $fieldsForm[0]['form']['input'][] = [
                 'type' => 'html',
-                'name' => $this->l('Based on the settings you provided this is the info i get from Piwik!')."<br>"
+                'name' => $this->l('Based on the settings you provided this is the info I get from Matomo!')."<br>"
                     ."<strong>".$this->l('Name')."</strong>: <i>{$this->matomoSite[0]['name']}</i><br>"
                     ."<strong>".$this->l('Main Url')."</strong>: <i>{$this->matomoSite[0]['main_url']}</i><br>"
-                    ."<a href='#' onclick='return PiwikLookup();' title='{$this->l('Click here to open piwik site lookup wizard')}'>{$this->l('Configuration Wizard')}</a>",
+                    ."<a href='#' onclick='return PiwikLookup();' title='{$this->l('Click here to open the Matomo site lookup wizard')}'>{$this->l('Configuration Wizard')}</a>",
             ];
         } else {
             $fieldsForm[0]['form']['input'][] = [
                 'type' => 'html',
-                'name' => "<a href='#' onclick='return PiwikLookup();' title='{$this->l('Click here to open piwik site lookup wizard')}'>{$this->l('Configuration Wizard')}</a>",
+                'name' => "<a href='#' onclick='return PiwikLookup();' title='{$this->l('Click here to open the Matomo site lookup wizard')}'>{$this->l('Configuration Wizard')}</a>",
             ];
         }
 
@@ -212,8 +213,8 @@ class PiwikAnalyticsJs extends Module
             'type'     => 'text',
             'label'    => $this->l('Matomo Host'),
             'name'     => static::HOST,
-            'desc'     => $this->l('Example: www.example.com/matomo/ (without protocol and with / at the end!)'),
-            'hint'     => $this->l('The host where Matomo is installed.!'),
+            'desc'     => $this->l('Example: www.example.com/matomo/'),
+            'hint'     => $this->l('The host where Matomo is installed'),
             'required' => true,
         ];
         $fieldsForm[0]['form']['input'][] = [
@@ -286,8 +287,7 @@ class PiwikAnalyticsJs extends Module
         ];
         $fieldsForm[0]['form']['input'][] = [
             'type'    => 'switch',
-            'is_bool' => true, //retro compat 1.5
-            'label'   => $this->l('Enable client side DoNotTrack detection'),
+            'label'   => $this->l('Enable client-side DoNotTrack detection'),
             'name'    => static::DNT,
             'desc'    => $this->l('So tracking requests will not be sent if visitors do not wish to be tracked.'),
             'values'  => [
@@ -308,8 +308,8 @@ class PiwikAnalyticsJs extends Module
             $imageTracking = PKHelper::getPiwikImageTrackingCode();
         } else {
             $imageTracking = [
-                'default' => $this->l('I need Site ID and Auth Token before i can get your image tracking code'),
-                'proxy'   => $this->l('I need Site ID and Auth Token before i can get your image tracking code'),
+                'default' => $this->l('I need your Site ID and Auth Token before I can grab your image tracking code'),
+                'proxy'   => $this->l('I need your Site ID and Auth Token before I can grab your image tracking code'),
             ];
         }
 
@@ -349,7 +349,7 @@ class PiwikAnalyticsJs extends Module
                 'query'   => array_map(function ($currency) {
                     return [
                         'iso_code' => $currency['iso_code'],
-                        'name'     => "{$currency['name']} {$currency['iso_code']}",
+                        'name'     => "{$currency['name']} ({$currency['iso_code']})",
                     ];
                 }, Currency::getCurrencies()),
                 'id'      => 'iso_code',
@@ -382,7 +382,7 @@ class PiwikAnalyticsJs extends Module
 
         $fieldsForm[0]['form']['input'][] = [
             'type'         => 'text',
-            'label'        => $this->l('Matomo User name'),
+            'label'        => $this->l('Matomo Username'),
             'name'         => static::USRNAME,
             'desc'         => $this->l('You can store your Username for Matomo here to make it easy to open Matomo interface from your stats page with automatic login'),
             'required'     => false,
@@ -390,11 +390,12 @@ class PiwikAnalyticsJs extends Module
         ];
         $fieldsForm[0]['form']['input'][] = [
             'type'         => 'password',
-            'label'        => $this->l('Matomo User password'),
+            'label'        => $this->l('Matomo Password'),
             'name'         => static::USRPASSWD,
             'desc'         => $this->l('You can store your Password for Matomo here to make it easy to open Matomo interface from your stats page with automatic login'),
             'required'     => false,
             'autocomplete' => false,
+            'class'        => 'fixed-width-xxl',
         ];
 
         $fieldsForm[0]['form']['submit'] = [
@@ -502,7 +503,7 @@ class PiwikAnalyticsJs extends Module
                 ],
                 [
                     'type'         => 'text',
-                    'label'        => $this->l('Proxy Script Username'),
+                    'label'        => $this->l('HTTP Basic Authentication Username'),
                     'name'         => static::PAUTHUSR,
                     'required'     => false,
                     'autocomplete' => false,
@@ -510,11 +511,12 @@ class PiwikAnalyticsJs extends Module
                 ],
                 [
                     'type'         => 'password',
-                    'label'        => $this->l('Proxy Script Password'),
+                    'label'        => $this->l('HTTP Basic Authentication Password'),
                     'name'         => static::PAUTHPWD,
                     'required'     => false,
                     'autocomplete' => false,
                     'desc'         => $this->l('this field along with username can be used if Matomo installation is protected by HTTP Basic Authorization'),
+                    'class'        => 'fixed-width-xxl',
                 ],
             ],
             'submit'      => [
@@ -652,13 +654,13 @@ class PiwikAnalyticsJs extends Module
                         'type'  => 'tags',
                         'label' => $this->l('Excluded ip addresses'),
                         'name'  => 'PKAdminExcludedIps',
-                        'desc'  => $this->l('ip addresses excluded from tracking, separated by comma ","'),
+                        'desc'  => $this->l('IP addresses excluded from tracking'),
                     ],
                     [
                         'type'  => 'tags',
                         'label' => $this->l('Excluded Query Parameters'),
                         'name'  => 'PKAdminExcludedQueryParameters',
-                        'desc'  => $this->l('please read: http://piwik.org/faq/how-to/faq_81/'),
+                        'desc'  => $this->l('Please read:').' <a href="https://matomo.org/faq/how-to/faq_81/" target="_blank">https://matomo.org/faq/how-to/faq_81/</a>',
                     ],
                     [
                         'type'    => 'select',
@@ -712,7 +714,7 @@ class PiwikAnalyticsJs extends Module
                         'name'  => 'PKAdminExcludedUserAgents',
                         'rows'  => 10,
                         'cols'  => 50,
-                        'desc'  => $this->l('please read: http://piwik.org/faq/how-to/faq_17483/'),
+                        'desc'  => $this->l('Please read:').' <a href="http://matomo.org/faq/how-to/faq_17483/">http://matomo.org/faq/how-to/faq_17483/</a>',
                     ],
                     [
                         'type'    => 'switch',
@@ -732,17 +734,15 @@ class PiwikAnalyticsJs extends Module
                             ],
                         ],
                     ],
-                    //                    array(
-                    //                        'type' => 'text',
-                    //                        'label' => $this->l('Site Type'),
-                    //                        'name' => 'PKAdminSiteType',
-                    //                    ),
-                    [
-                        'type' => 'html', 'name' => "
-<button onclick=\"return submitPiwikSiteAPIUpdate()\"
-        id=\"submitUpdatePiwikAdmSite\" class=\"btn btn-default pull-left\"
-        name=\"submitUpdatePiwikAdmSite\" value=\"1\" type=\"button\">
-    <i class=\"process-icon-save\"></i>{$this->l('Save')}</button>",
+                ],
+                'buttons' => [
+                    'submit' => [
+                        'title' => $this->l('Save'),
+                        'id'    => 'submitUpdatePiwikAdmSite',
+                        'name'  => 'submitUpdatePiwikAdmSite',
+                        'class' => 'btn btn-default pull-right',
+                        'icon'  => 'process-icon-save',
+                        'js'    => 'return submitPiwikSiteAPIUpdate()',
                     ],
                 ],
             ];
