@@ -23,70 +23,105 @@
 *}
 <script type="text/javascript">
   function submitPiwikSiteAPIUpdate() {
-    var idSite = $('#PKAdminIdSite').val();
-    var siteName = $('#PKAdminSiteName').val();
-    /*var urls = $('#PKAdminSiteUrls').val();*/
-    var ecommerce = $('input[name=PKAdminEcommerce]:checked').val();
-    var siteSearch = $('input[name=PKAdminSiteSearch]:checked').val();
-    if ($.isFunction($.fn.tagify))
-      $(this).find('#PKAdminSearchKeywordParameters').val($('#PKAdminSearchKeywordParameters').tagify('serialize'));
-    var searchKeywordParameters = $('#PKAdminSearchKeywordParameters').val();
-    if ($.isFunction($.fn.tagify))
-      $(this).find('#PKAdminSearchCategoryParameters').val($('#PKAdminSearchCategoryParameters').tagify('serialize'));
-    var searchCategoryParameters = $('#PKAdminSearchCategoryParameters').val();
-    if ($.isFunction($.fn.tagify))
-      $(this).find('#PKAdminExcludedIps').val($('#PKAdminExcludedIps').tagify('serialize'));
-    var excludedIps = $('#PKAdminExcludedIps').val();
-    if ($.isFunction($.fn.tagify))
-      $(this).find('#PKAdminExcludedQueryParameters').val($('#PKAdminExcludedQueryParameters').tagify('serialize'));
-    var excludedQueryParameters = $('#PKAdminExcludedQueryParameters').val();
-    var timezone = $('#PKAdminTimezone').val();
-    var currency = $('#PKAdminCurrency').val();
-    /*var group = $('#PKAdminGroup').val();*/
-    /*var startDate = $('#PKAdminStartDate').val();*/
-    var excludedUserAgents = $('#PKAdminExcludedUserAgents').val();
-    var keepURLFragments = $('input[name=PKAdminKeepURLFragments]:checked').val();
-    /*var type = $('#PKAdminSiteType').val();*/
-    $.ajax({
-      type: 'POST',
-      url: '{$psm_currentIndex}&token={$psm_token}',
-      dataType: 'json',
-      data: {
-        pkapicall: 'updatePiwikSite',
-        ajax: 1,
-        idSite: idSite,
-        siteName: siteName,
-        ecommerce: ecommerce,
-        siteSearch: siteSearch,
-        searchKeywordParameters: searchKeywordParameters,
-        searchCategoryParameters: searchCategoryParameters,
-        excludedIps: excludedIps,
-        excludedQueryParameters: excludedQueryParameters,
-        timezone: timezone,
-        currency: currency,
-        keepURLFragments: keepURLFragments,
-        /*group: group, */
-        excludedUserAgents: excludedUserAgents,
-      },
-      beforeSend: function () {
-        showLoadingStuff();
-      },
-      success: function (data) {
-        swal({
-          icon: 'success',
-          text: data.message
-        });
-      },
-      error: function (XMLHttpRequest, textStatus, errorThrown) {
-        swal({
-          icon: 'error',
-          text: "Error while saving Piwik Data\n\ntextStatus: '" + textStatus + "'\nerrorThrown: '" + errorThrown + "'\nresponseText:\n" + XMLHttpRequest.responseText
-        });
-      },
-      complete: function () {
-        hideLoadingStuff();
+    var ajaxes = [];
+    if ($('#fieldset_2_2').is(':visible')) {
+      var idSite = $('#PKAdminIdSite').val();
+      var siteName = $('#PKAdminSiteName').val();
+      /*var urls = $('#PKAdminSiteUrls').val();*/
+      var ecommerce = $('input[name=PKAdminEcommerce]:checked').val();
+      var siteSearch = $('input[name=PKAdminSiteSearch]:checked').val();
+      if ($.isFunction($.fn.tagify)) {
+        $(this).find('#PKAdminSearchKeywordParameters').val($('#PKAdminSearchKeywordParameters').tagify('serialize'));
       }
-    });
+      var searchKeywordParameters = $('#PKAdminSearchKeywordParameters').val();
+      if ($.isFunction($.fn.tagify)) {
+        $(this).find('#PKAdminSearchCategoryParameters').val($('#PKAdminSearchCategoryParameters').tagify('serialize'));
+      }
+      var searchCategoryParameters = $('#PKAdminSearchCategoryParameters').val();
+      if ($.isFunction($.fn.tagify)) {
+        $(this).find('#PKAdminExcludedIps').val($('#PKAdminExcludedIps').tagify('serialize'));
+      }
+      var excludedIps = $('#PKAdminExcludedIps').val();
+      if ($.isFunction($.fn.tagify)) {
+        $(this).find('#PKAdminExcludedQueryParameters').val($('#PKAdminExcludedQueryParameters').tagify('serialize'));
+      }
+      var excludedQueryParameters = $('#PKAdminExcludedQueryParameters').val();
+      var timezone = $('#PKAdminTimezone').val();
+      var currency = $('#PKAdminCurrency').val();
+      /*var group = $('#PKAdminGroup').val();*/
+      /*var startDate = $('#PKAdminStartDate').val();*/
+      var excludedUserAgents = $('#PKAdminExcludedUserAgents').val();
+      var keepURLFragments = $('input[name=PKAdminKeepURLFragments]:checked').val();
+      /*var type = $('#PKAdminSiteType').val();*/
+      ajaxes.push($.ajax({
+        type: 'POST',
+        url: '{$psm_currentIndex|escape:'javascript'}&token={$psm_token|escape:'javascript'}',
+        dataType: 'json',
+        data: {
+          pkapicall: 'updatePiwikSite',
+          ajax: 1,
+          idSite: idSite,
+          siteName: siteName,
+          ecommerce: ecommerce,
+          siteSearch: siteSearch,
+          searchKeywordParameters: searchKeywordParameters,
+          searchCategoryParameters: searchCategoryParameters,
+          excludedIps: excludedIps,
+          excludedQueryParameters: excludedQueryParameters,
+          timezone: timezone,
+          currency: currency,
+          keepURLFragments: keepURLFragments,
+          /*group: group, */
+          excludedUserAgents: excludedUserAgents,
+        },
+        beforeSend: function () {
+          showLoadingStuff();
+        },
+      }));
+    }
+
+    if (typeof FormData !== 'undefined') {
+      var formData = new FormData(document.getElementById('configuration_form'));
+      formData.append('configuration_form_submit_btn', '1');
+      formData.append('submitUpdatepiwikanalyticsjs', '1');
+      ajaxes.push($.ajax({
+        type: 'POST',
+        url: '{$psm_currentIndex|escape:'javascript'}&token={$psm_token|escape:'javascript'}',
+        processData: false,
+        dataType: false,
+        contentType: false,
+        data: formData,
+      }));
+    } else {
+      $('#configuration_form_submit_btn').click();
+      return false;
+    }
+
+    if (ajaxes.length) {
+      $.when.apply($, ajaxes)
+        .then(function (api) {
+          if (typeof FormData !== 'undefined') {
+            swal({
+              icon: 'success',
+              text: api[0].message
+            });
+          } else {
+            $('#configuration_form_submit_btn').click();
+          }
+        })
+        .fail(function (api, config) {
+          swal({
+            icon: 'error',
+            text: "Error while saving Piwik Data\n\ntextStatus: '" + (api[0] || config[0]) + "'\nerrorThrown: '" + (api[1] || config[1]) + "'\nresponseText:\n" + (api[2].responseText || config[2].responseText)
+          });
+        })
+        .done(function () {
+          hideLoadingStuff();
+        })
+      ;
+    } else if (typeof FormData === 'undefined') {
+      $('#configuration_form_submit_btn').click();
+    }
 
     return false;
   }
