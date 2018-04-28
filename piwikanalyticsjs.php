@@ -401,6 +401,8 @@ class PiwikAnalyticsJs extends Module
 
         $fieldsForm[0]['form']['buttons'] = ['submit' => [
             'title' => $this->l('Save'),
+            'name'  => 'configuration_form_submit_btn',
+            'id'    => 'configuration_form_submit_btn',
             'class' => 'btn btn-default pull-right',
             'icon'  => 'process-icon-save',
             'js'    => 'return submitPiwikSiteAPIUpdate(event, false)',
@@ -513,6 +515,8 @@ class PiwikAnalyticsJs extends Module
             ],
             'buttons' => [
                 'submit' => [
+                    'id'    => 'configuration_form_submit_btn2',
+                    'name'  => 'configuration_form_submit_btn2',
                     'title' => $this->l('Save'),
                     'class' => 'btn btn-default pull-right',
                     'icon'  => 'process-icon-save',
@@ -742,21 +746,12 @@ class PiwikAnalyticsJs extends Module
             ];
         }
         $helper->fields_value = $this->getFormFields();
-        $this->context->smarty->assign([
-            'psversion'        => _PS_VERSION_,
-            'tbversion'        => _TB_VERSION_,
-            /* piwik_site_lookup */
-            'psl_CPREFIX'      => 'PIWIK',
-            'psl_currentIndex' => $helper->currentIndex,
-            'psl_token'        => $helper->token,
-            /* piwik_site_manager */
-            'psm_currentIndex' => $helper->currentIndex,
-            'psm_token'        => $helper->token,
-        ]);
+        $this->context->controller->addJquery();
+        $this->context->controller->addJS($this->_path.'views/js/site-manager.js');
+        $this->context->controller->addCSS($this->_path.'views/css/site-manager.css');
 
         return $helper->generateForm($fieldsForm)
-            .$this->display(__FILE__, 'views/templates/admin/piwik_site_manager.tpl')
-            .$this->display(__FILE__, 'views/templates/admin/piwik_site_lookup.tpl');
+            .$this->display(__FILE__, 'views/templates/admin/matomo_site_lookup.tpl');
     }
 
     /**

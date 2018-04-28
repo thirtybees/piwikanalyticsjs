@@ -21,12 +21,12 @@
  * @license   http://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  * PrestaShop is an internationally registered trademark & property of PrestaShop SA
 *}
-{capture name="modalHtml"}{strip}{include file="./piwik_site_lookup_modal.tpl"}{/strip}{/capture}
-{capture name="siteIdInput"}{strip}{include file="./piwik_site_lookup_siteid.tpl"}{/strip}{/capture}
-{capture name="authTokenInput"}{strip}{include file="./piwik_site_lookup_auth_token.tpl"}{/strip}{/capture}
+{capture name="modalHtml"}{strip}{include file="./matomo_site_lookup_modal.tpl"}{/strip}{/capture}
+{capture name="siteIdInput"}{strip}{include file="./matomo_site_lookup_siteid.tpl"}{/strip}{/capture}
+{capture name="authTokenInput"}{strip}{include file="./matomo_site_lookup_auth_token.tpl"}{/strip}{/capture}
 <script type="text/javascript">
-  var idPKSiteId = '{$psl_CPREFIX|escape:'javascript'}SITEID';
-  var idPKToken = '{$psl_CPREFIX|escape:'javascript'}TOKEN_AUTH';
+  var idPKSiteId = 'PIWIK_SITEID';
+  var idPKToken = 'PIWIK_TOKEN_AUTH';
   var htmls000 = '{$smarty.capture.modalHtml|escape:'javascript'}';
   var htmls001 = '{$smarty.capture.siteIdInput|escape:'javascript'}';
   var htmls002 = '{$smarty.capture.authTokenInput|escape:'javascript'}';
@@ -140,7 +140,7 @@
           /* get auth token */
           $.ajax({
             type: 'POST',
-            url: '{$psl_currentIndex|escape:'javascript'}&token={$psl_token|escape:'javascript'}',
+            url: window.currentIndex + '&configure=piwikanalyticsjs&token=' + window.token,
             dataType: 'json',
             data: {
               'pkapicall': 'getTokenAuth',
@@ -204,7 +204,7 @@
             },
             error: function (XMLHttpRequest, textStatus, errorThrown) {
               var elem = document.createElement('P');
-              p.innerHTML =
+              elem.innerHTML =
               swal({
                 icon: 'error',
                 title: '{l s='Error while fetching Matomo Data' mod='piwikanalyticsjs' js=1}',
@@ -223,51 +223,9 @@
     if ($('#_form_submit_btn').length > 0) {
       $('#_form_submit_btn').click();
     }
-    if ($('#configuration_form_submit_btn').length > 0) {
-      $('#configuration_form_submit_btn').click();
+    if ($('#configuration_form').length > 0) {
+      $('#configuration_form').submit();
     }
   }
-
 </script>
-
-<style type="text/css">
-  .PiwikLookupModalDialog {
-    position: fixed;
-    font-family: Arial, Helvetica, sans-serif;
-    top: 0;
-    right: 0;
-    bottom: 0;
-    left: 0;
-    background: rgba(0, 0, 0, .8);
-    z-index: 9999;
-    opacity: 0;
-    -webkit-transition: opacity 400ms ease-in;
-    -moz-transition: opacity 400ms ease-in;
-    transition: opacity 400ms ease-in;
-    pointer-events: none
-  }
-
-  {* .PiwikLookupModalDialog:target { opacity:1;pointer-events:auto } *}
-  .PiwikLookupModalDialog > div {
-    width: 500px;
-    position: relative;
-    margin: 35px auto;
-    padding: 5px 20px 13px 20px;
-    border-radius: 10px;
-    background: #fff;
-    /*background: -moz-linear-gradient(#fff, #DDD);*/
-    /*background: -webkit-linear-gradient(#fff, #DDD);*/
-    /*background: -o-linear-gradient(#fff, #DDD)*/
-  }
-
-  .PiwikLookupClose {
-    cursor: pointer;
-    margin-right: -14px;
-  }
-
-  .PiwikLookupClose:hover {
-    opacity: 0.6;
-  }
-</style>
-{* <a href="#PiwikLookupModal"onclick="PiwikLookup();">Open Modal 2</a> *}
 <div id="PiwikLookupModal" class="PiwikLookupModalDialog"></div>
