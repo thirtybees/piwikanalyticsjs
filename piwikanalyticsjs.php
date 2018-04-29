@@ -405,7 +405,7 @@ class PiwikAnalyticsJs extends Module
             'id'    => 'configuration_form_submit_btn',
             'class' => 'btn btn-default pull-right',
             'icon'  => 'process-icon-save',
-            'js'    => 'return submitPiwikSiteAPIUpdate(event, false)',
+            'js'    => 'return submitPiwikSiteAPIUpdate(event, false); return false;',
         ]];
 
         $fieldsForm[1]['form'] = [
@@ -520,7 +520,7 @@ class PiwikAnalyticsJs extends Module
                     'title' => $this->l('Save'),
                     'class' => 'btn btn-default pull-right',
                     'icon'  => 'process-icon-save',
-                    'js'    => 'return submitPiwikSiteAPIUpdate(event, false)',
+                    'js'    => 'return submitPiwikSiteAPIUpdate(event, false); return false;',
                 ],
             ]
         ];

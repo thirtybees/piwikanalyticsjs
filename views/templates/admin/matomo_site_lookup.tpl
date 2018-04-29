@@ -220,9 +220,6 @@
   function PiwikLookupSetSiteId(id) {
     $('#PIWIK_SITEID').val(id);
     PiwikLookup();
-    if ($('#_form_submit_btn').length > 0) {
-      $('#_form_submit_btn').click();
-    }
     if ($('#configuration_form').length > 0) {
       $('#configuration_form').submit();
     }

@@ -75,10 +75,7 @@ function submitPiwikSiteAPIUpdate(event, submitAll) {
         keepURLFragments: keepURLFragments,
         /*group: group, */
         excludedUserAgents: excludedUserAgents,
-      },
-      beforeSend: function () {
-        showLoadingStuff();
-      },
+      }
     }));
   }
 
@@ -102,6 +99,7 @@ function submitPiwikSiteAPIUpdate(event, submitAll) {
   }
 
   if (ajaxes.length) {
+    showLoadingStuff();
     $.when.apply($, ajaxes)
       .then(function (api) {
         if (submitAll && typeof FormData !== 'undefined') {
@@ -126,8 +124,8 @@ function submitPiwikSiteAPIUpdate(event, submitAll) {
         hideLoadingStuff();
       })
     ;
-  } else if (typeof FormData === 'undefined') {
-    $('#configuration_form_submit_btn').click();
+  } else if (typeof FormData === 'undefined' || (!submitAll && event)) {
+    $('#configuration_form').submit();
   }
 
   return false;
