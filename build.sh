@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 CWD_BASENAME=${PWD##*/}
 
+composer -o dump-autoload
+
 FILES=("logo.gif")
 FILES+=("logo.png")
 FILES+=("gpl.txt")
