@@ -79,7 +79,6 @@ class PiwikAnalyticsJs extends Module
     const CART_PRODUCTS = 'PIWIK_CART_PRODUCTS';
     const CART_TOTAL = 'PIWIK_CART_TOTAL';
     const PRODUCTS = 'PIWIK_PRODUCTS';
-    const category = 'PIWIK_category';
     /** @var bool $isOrder */
     private static $isOrder = false;
     /** @var bool $matomoSite */
@@ -1047,8 +1046,8 @@ class PiwikAnalyticsJs extends Module
                 $smarty_ad[] = [
                     'SKU'      => $this->parseProductSku($value['id_product'], (isset($value['id_product_attribute']) && $value['id_product_attribute'] > 0 ? $value['id_product_attribute'] : false), (isset($value['reference']) ? $value['reference'] : false)),
                     'NAME'     => $value['name'].(isset($value['attributes']) ? ' ('.$value['attributes'].')' : ''),
-                    'CATEGORY' => $this->getCategoryNamesByProduct($value['id_product'], false),
-                    'PRICE'    => $this->currencyConvertion(
+                    'CATEGORY' => $this->getCategoryNamesByProduct($value['id_product']),
+                    'PRICE'    => $this->currencyConversion(
                         [
                             'price'           => $value['total_wt'],
                             'conversion_rate' => $Currency->conversion_rate,
@@ -1060,7 +1059,7 @@ class PiwikAnalyticsJs extends Module
             if (count($smarty_ad) > 0) {
                 $this->context->smarty->assign(static::CART, true);
                 $this->context->smarty->assign(static::CART_PRODUCTS, $smarty_ad);
-                $this->context->smarty->assign(static::CART_TOTAL, $this->currencyConvertion(
+                $this->context->smarty->assign(static::CART_TOTAL, $this->currencyConversion(
                     [
                         'price'           => $this->context->cart->getOrderTotal(),
                         'conversion_rate' => $Currency->conversion_rate,
@@ -1199,7 +1198,7 @@ class PiwikAnalyticsJs extends Module
      * @since 0.4
      * @throws PrestaShopException
      */
-    protected function currencyConvertion($params)
+    protected function currencyConversion($params)
     {
         $pkc = Configuration::get("PIWIK_DEFAULT_CURRENCY");
         if (empty($pkc)) {
@@ -1235,7 +1234,7 @@ class PiwikAnalyticsJs extends Module
                         continue;
                     }
                     if ($product['categorys'] == null) {
-                        $product['categorys'] = $this->getCategoryNamesByProduct($product['product']->id, false);
+                        $product['categorys'] = $this->getCategoryNamesByProduct($product['product']->id);
                     }
                     $smarty_ad[] = [
                         /* (required) SKU: Product unique identifier */
@@ -1245,7 +1244,7 @@ class PiwikAnalyticsJs extends Module
                         /* (optional) Product category, or array of up to 5 categories */
                         'CATEGORY' => $product['categorys'], //$category->name,
                         /* (optional) Product Price as displayed on the page */
-                        'PRICE'    => $this->currencyConvertion(
+                        'PRICE'    => $this->currencyConversion(
                             [
                                 'price'           => Product::getPriceStatic($product['product']->id, true, false),
                                 'conversion_rate' => $this->context->currency->conversion_rate,
@@ -1263,7 +1262,7 @@ class PiwikAnalyticsJs extends Module
             $category = $controller->getCategory();
             if (Validate::isLoadedObject($category)) {
                 $this->context->smarty->assign([
-                    static::category => ['NAME' => $category->name],
+                    'piwik_category' => ['NAME' => $category->name],
                 ]);
             }
         }
@@ -1333,8 +1332,8 @@ class PiwikAnalyticsJs extends Module
                 $smarty_ad[] = [
                     'SKU'      => $this->parseProductSku($value['product_id'], (isset($value['product_attribute_id']) ? $value['product_attribute_id'] : false), (isset($value['product_reference']) ? $value['product_reference'] : false)),
                     'NAME'     => $value['product_name'],
-                    'CATEGORY' => $this->getCategoryNamesByProduct($value['product_id'], false),
-                    'PRICE'    => $this->currencyConvertion(
+                    'CATEGORY' => $this->getCategoryNamesByProduct($value['product_id']),
+                    'PRICE'    => $this->currencyConversion(
                         [
                             'price'           => (isset($value['total_price_tax_incl']) ? floatval($value['total_price_tax_incl']) : (isset($value['total_price_tax_incl']) ? floatval($value['total_price_tax_incl']) : 0.00)),
                             'conversion_rate' => (isset($params['objOrder']->conversion_rate) ? $params['objOrder']->conversion_rate : 0.00),
@@ -1355,31 +1354,31 @@ class PiwikAnalyticsJs extends Module
             }
             $ORDER_DETAILS = [
                 'order_id'        => $params['objOrder']->id,
-                'order_total'     => $this->currencyConvertion(
+                'order_total'     => $this->currencyConversion(
                     [
                         'price'           => floatval(isset($params['objOrder']->total_paid_tax_incl) ? $params['objOrder']->total_paid_tax_incl : (isset($params['objOrder']->total_paid) ? $params['objOrder']->total_paid : 0.00)),
                         'conversion_rate' => (isset($params['objOrder']->conversion_rate) ? $params['objOrder']->conversion_rate : 0.00),
                     ]
                 ),
-                'order_sub_total' => $this->currencyConvertion(
+                'order_sub_total' => $this->currencyConversion(
                     [
                         'price'           => floatval($params['objOrder']->total_products_wt),
                         'conversion_rate' => (isset($params['objOrder']->conversion_rate) ? $params['objOrder']->conversion_rate : 0.00),
                     ]
                 ),
-                'order_tax'       => $this->currencyConvertion(
+                'order_tax'       => $this->currencyConversion(
                     [
                         'price'           => floatval($tax),
                         'conversion_rate' => (isset($params['objOrder']->conversion_rate) ? $params['objOrder']->conversion_rate : 0.00),
                     ]
                 ),
-                'order_shipping'  => $this->currencyConvertion(
+                'order_shipping'  => $this->currencyConversion(
                     [
                         'price'           => floatval((isset($params['objOrder']->total_shipping_tax_incl) ? $params['objOrder']->total_shipping_tax_incl : (isset($params['objOrder']->total_shipping) ? $params['objOrder']->total_shipping : 0.00))),
                         'conversion_rate' => (isset($params['objOrder']->conversion_rate) ? $params['objOrder']->conversion_rate : 0.00),
                     ]
                 ),
-                'order_discount'  => $this->currencyConvertion(
+                'order_discount'  => $this->currencyConversion(
                     [
                         'price'           => (isset($params['objOrder']->total_discounts_tax_incl) ?
                             ($params['objOrder']->total_discounts_tax_incl > 0 ?
@@ -1592,38 +1591,23 @@ class PiwikAnalyticsJs extends Module
      * get category names by product id
      *
      * @param int  $id    product id
-     * @param bool $array get categories as PHP array (TRUE), or javacript (FAlSE)
      *
      * @return string|array
      * @throws PrestaShopDatabaseException
      * @throws PrestaShopException
      */
-    protected function getCategoryNamesByProduct($id, $array = true)
+    protected function getCategoryNamesByProduct($id)
     {
-        $_categories = Product::getProductCategoriesFull($id, $this->context->cookie->id_lang);
-        if (!is_array($_categories)) {
-            return $array ? [] : '[]';
+        $dbCategories = Product::getProductCategoriesFull($id, $this->context->cookie->id_lang);
+        if (!is_array($dbCategories)) {
+            return [];
         }
-        if ($array) {
-            $categories = [];
-            foreach ($_categories as $category) {
-                $categories[] = $category['name'];
-                if (count($categories) == 5) {
-                    break;
-                }
+        $categories = [];
+        foreach ($dbCategories as $category) {
+            $categories[] = $category['name'];
+            if (count($categories) === 5) {
+                break;
             }
-        } else {
-            $categories = '[';
-            $c = 0;
-            foreach ($_categories as $category) {
-                $c++;
-                $categories .= '"'.$category['name'].'",';
-                if ($c == 5) {
-                    break;
-                }
-            }
-            $categories = rtrim($categories, ',');
-            $categories .= ']';
         }
 
         return $categories;
