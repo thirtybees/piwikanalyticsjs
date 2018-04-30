@@ -59,7 +59,7 @@
     {/foreach}
     {/if}
     {if isset($piwik_category) && is_array($piwik_category)}
-      _paq.push(['setEcommerceView', false, false, '{$piwik_category.NAME|escape:'htmlall':'UTF-8'}']);
+      _paq.push(['setEcommerceView', false, false, '{$piwik_category.NAME|escape:'javascript'}']);
     {/if}
     {if $PIWIK_CART}
     {if is_array($PIWIK_CART_PRODUCTS)}
