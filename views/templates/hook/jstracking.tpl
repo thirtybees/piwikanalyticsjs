@@ -55,7 +55,7 @@
     {/if}
     {if isset($PIWIK_PRODUCTS) && is_array($PIWIK_PRODUCTS)}
     {foreach from=$PIWIK_PRODUCTS item=piwikproduct}
-      _paq.push(['setEcommerceView', '{$piwikproduct.SKU|escape:'javascript'}', '{$piwikproduct.NAME|escape:'javascript'}', {$piwikproduct.CATEGORY|json_encode}, '{$piwikproduct.PRICE|floatval}']);
+      _paq.push(['setEcommerceView', '{$piwikproduct.SKU|escape:'javascript'}', '{$piwikproduct.NAME|escape:'javascript'}', {json_encode($piwikproduct.CATEGORY, $smarty.const.JSON_UNESCAPED_UNICODE)}, '{$piwikproduct.PRICE|floatval}']);
     {/foreach}
     {/if}
     {if isset($piwik_category) && is_array($piwik_category)}
@@ -64,7 +64,7 @@
     {if $PIWIK_CART}
     {if is_array($PIWIK_CART_PRODUCTS)}
     {foreach from=$PIWIK_CART_PRODUCTS item=_product}
-      _paq.push(['addEcommerceItem', '{$_product.SKU|escape:'javascript'}', '{$_product.NAME|escape:'javascript'}', {$_product.CATEGORY|json_encode}, '{$_product.PRICE|escape:'javascript'}', '{$_product.QUANTITY|escape:'javascript'}']);
+      _paq.push(['addEcommerceItem', '{$_product.SKU|escape:'javascript'}', '{$_product.NAME|escape:'javascript'}', {json_encode($_product.CATEGORY, $smarty.const.JSON_UNESCAPED_UNICODE)}, '{$_product.PRICE|escape:'javascript'}', '{$_product.QUANTITY|escape:'javascript'}']);
     {/foreach}
     {/if}
     {if isset($PIWIK_CART_TOTAL)}
@@ -74,7 +74,7 @@
     {if $PIWIK_ORDER}
     {if is_array($PIWIK_ORDER_PRODUCTS)}
     {foreach from=$PIWIK_ORDER_PRODUCTS item=_product}
-      _paq.push(['addEcommerceItem', '{$_product.SKU|escape:'javascript'}', '{$_product.NAME|escape:'javascript'}', {$_product.CATEGORY|json_encode}, '{$_product.PRICE|escape:'javascript'}', '{$_product.QUANTITY|escape:'javascript'}']);
+      _paq.push(['addEcommerceItem', '{$_product.SKU|escape:'javascript'}', '{$_product.NAME|escape:'javascript'}', {json_encode($_product.CATEGORY, $smarty.const.JSON_UNESCAPED_UNICODE)}, '{$_product.PRICE|escape:'javascript'}', '{$_product.QUANTITY|escape:'javascript'}']);
     {/foreach}
     {/if}
       _paq.push(['trackEcommerceOrder', '{$PIWIK_ORDER_DETAILS.order_id|escape:'javascript'}', '{$PIWIK_ORDER_DETAILS.order_total|escape:'javascript'}', '{$PIWIK_ORDER_DETAILS.order_sub_total|escape:'javascript'}', '{$PIWIK_ORDER_DETAILS.order_tax|escape:'javascript'}', '{$PIWIK_ORDER_DETAILS.order_shipping|escape:'javascript'}', '{$PIWIK_ORDER_DETAILS.order_discount|escape:'javascript'}']);
