@@ -19,7 +19,7 @@
  * @link http://cmjnisse.github.io/piwikanalyticsjs-prestashop
  * @license http://www.gnu.org/licenses/gpl-3.0.html GPL v3 or later
 *}
-<script type="text/javascript">
+<script type="text/javascript" data-cookieconsent="statistics">
     var u = '{Tools::getShopProtocol()|escape:'javascript'}{$PIWIK_HOST|escape:'javascript'}';
     var _paq = _paq || [];
     {if isset($PIWIK_DNT)}{$PIWIK_DNT}{/if}
