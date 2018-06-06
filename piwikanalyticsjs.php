@@ -96,7 +96,7 @@ class PiwikAnalyticsJs extends Module
     {
         $this->name = 'piwikanalyticsjs';
         $this->tab = 'analytics_stats';
-        $this->version = '1.2.0';
+        $this->version = '1.2.1';
         $this->author = 'thirty bees';
         $this->displayName = $this->l('Matomo Web Analytics');
 
