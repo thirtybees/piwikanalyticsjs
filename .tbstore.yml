@@ -3,12 +3,13 @@ compatible_versions: 1.0.0+
 author: thirty bees
 category: statistics
 tags:
-  - piwik
-  - google analytics
-  - statistics
-  - tracking
+- piwik
+- google analytics
+- statistics
+- tracking
+- piwikanalyticsjs
 description_short: The Piwik module allows you to install Piwik analytics on your site to track users.
 description: description.md
 images:
-  - image-1.png
+- image-1.png
 license: AFL
