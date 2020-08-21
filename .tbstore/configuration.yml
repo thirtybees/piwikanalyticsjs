@@ -1,4 +1,4 @@
-module_name: Piwik Module
+module_name: Matomo Module
 compatible_versions: 1.0.0+
 author: thirty bees
 category: statistics
