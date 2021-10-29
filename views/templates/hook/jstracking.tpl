@@ -49,6 +49,12 @@
       _paq.push(['setUserId', '{$PIWIK_UUID|escape:'javascript'}']);
       _paq.push(['setCustomVariable', 1, 'First Name', '{$cookie->customer_firstname|escape:'javascript'}', 'visit']);
       _paq.push(['setCustomVariable', 2, 'Last Name', '{$cookie->customer_lastname|escape:'javascript'}', 'visit']);
+      {if isset($PIWIK_GROUP_NAME)}	
+		_paq.push(['setCustomVariable', 3, 'Group Name', '{$PIWIK_GROUP_NAME|escape:'javascript'}', 'visit']);
+	  {/if} 
+  	  {if isset($PIWIK_GROUP_ID)}	 
+	    _paq.push(['setCustomVariable', 4, 'Group Id', '{$PIWIK_GROUP_ID|escape:'javascript'}', 'visit']);
+	  {/if} 
     {/if}
     {if isset($smarty.request.email)}
       _paq.push(['setUserId', '{$smarty.request.email|escape:'javascript'}']);
