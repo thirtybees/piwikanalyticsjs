@@ -74,6 +74,8 @@ class PiwikAnalyticsJs extends Module
     const ORDER_DETAILS = 'PIWIK_ORDER_DETAILS';
     const CART = 'PIWIK_CART';
     const UUID = 'PIWIK_UUID';
+    const GROUP_ID = 'PIWIK_GROUP_ID';
+    const GROUP_NAME = 'PIWIK_GROUP_NAME';
     const SITE_SEARCH = 'PIWIK_SITE_SEARCH';
     const TAPID = 'PIWIK_TAPID';
     const CART_PRODUCTS = 'PIWIK_CART_PRODUCTS';
@@ -1159,6 +1161,14 @@ class PiwikAnalyticsJs extends Module
 
         if ($this->context->customer->isLogged()) {
             $this->context->smarty->assign(static::UUID, $this->context->customer->email);
+            $groupId = (int) Customer::getDefaultGroupId((int)$this->context->customer->id);
+            if ($groupId) {
+                $group = new Group($groupId, Configuration::get('PS_LANG_DEFAULT'));
+                if (Validate::isLoadedObject($group)) {
+                    $this->context->smarty->assign(static::GROUP_ID, $groupId);
+                    $this->context->smarty->assign(static::GROUP_NAME, $group->name);
+                }
+            }
         }
     }
 
