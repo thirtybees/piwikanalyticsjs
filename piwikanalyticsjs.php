@@ -28,7 +28,7 @@ if (!defined('_TB_VERSION_')) {
     exit;
 }
 
-require_once __DIR__.'/vendor/autoload.php';
+require_once __DIR__.'/classes/PKHelper.php';
 
 /**
  * Class PiwikAnalyticsJs
