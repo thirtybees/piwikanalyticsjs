@@ -1,2 +1,6 @@
 vendor/
 *piwikanalyticsjs*.zip
+translations/*
+!/translations/index.php
+/config*.xml
+
