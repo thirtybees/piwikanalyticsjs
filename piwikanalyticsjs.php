@@ -103,6 +103,7 @@ class PiwikAnalyticsJs extends Module
         $this->displayName = $this->l('Matomo Web Analytics');
 
         $this->bootstrap = true;
+        $this->need_instance = true;
 
         parent::__construct($name, ($context instanceof Context ? $context : null));
 
