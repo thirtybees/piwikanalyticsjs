@@ -57,8 +57,6 @@ class PiwikAnalyticsController extends ModuleAdminController
             return;
         }
 
-        $this->initTabModuleList();
-        $this->addToolBarModulesListButton();
         $this->toolbar_title = $this->l('Stats', 'PiwikAnalytics');
         $this->initPageHeaderToolbar();
         $http = Tools::getShopProtocol();
