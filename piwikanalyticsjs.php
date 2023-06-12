@@ -130,6 +130,7 @@ class PiwikAnalyticsJs extends Module
      * @throws PrestaShopDatabaseException
      * @throws PrestaShopException
      * @throws SmartyException
+     * @throws \GuzzleHttp\Exception\GuzzleException
      * @global string $currentIndex
      */
     public function getContent()
@@ -1174,11 +1175,11 @@ class PiwikAnalyticsJs extends Module
     }
 
     /**
-     * @param      $id
+     * @param int|string $id
      * @param bool $attrid
      * @param bool $ref
      *
-     * @return mixed
+     * @return string
      * @throws PrestaShopException
      */
     protected function parseProductSku($id, $attrid = false, $ref = false)
@@ -1283,7 +1284,7 @@ class PiwikAnalyticsJs extends Module
      * PIWIK don't track links on the same site eg.
      * if product is view in an iframe so we add this and makes sure that it is content only view
      *
-     * @param mixed $param
+     * @param array $param
      *
      * @return string
      * @throws PrestaShopDatabaseException
@@ -1458,7 +1459,6 @@ class PiwikAnalyticsJs extends Module
      * Install the module
      *
      * @return boolean false on install error
-     * @throws Adapter_Exception
      * @throws PrestaShopDatabaseException
      * @throws PrestaShopException
      */
@@ -1603,7 +1603,7 @@ class PiwikAnalyticsJs extends Module
      *
      * @param int  $id    product id
      *
-     * @return string|array
+     * @return array
      * @throws PrestaShopDatabaseException
      * @throws PrestaShopException
      */

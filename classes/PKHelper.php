@@ -26,7 +26,6 @@
 
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\ClientException;
-use GuzzleHttp\Exception\RequestException;
 use GuzzleHttp\Exception\TransferException;
 
 if (!defined('_TB_VERSION_')) {
@@ -103,6 +102,9 @@ class PKHelper
      * @var string
      */
     public static $error = '';
+    /**
+     * @var array
+     */
     protected static $_cachedResults = [];
 
     /**
@@ -110,8 +112,17 @@ class PKHelper
      */
     const FAKEUSERAGENT = "Mozilla/5.0 (Windows NT 6.3; WOW64; rv:35.0) Gecko/20100101 Firefox/35.0 (Fake Useragent from CLASS:PKHelper.php)";
 
+    /**
+     * @var string
+     */
     public static $httpAuthUsername = '';
+    /**
+     * @var string
+     */
     public static $httpAuthPassword = '';
+    /**
+     * @var string
+     */
     public static $piwikHost = '';
 
     /**
@@ -162,25 +173,26 @@ class PKHelper
     /**
      *
      * @param string $idSite
-     * @param string $siteName
-     * @param array  $urls
-     * @param type   $ecommerce
-     * @param type   $siteSearch
-     * @param type   $searchKeywordParameters
-     * @param type   $searchCategoryParameters
-     * @param type   $excludedIps
-     * @param type   $excludedQueryParameters
-     * @param type   $timezone
-     * @param type   $currency
-     * @param type   $group
-     * @param type   $startDate
-     * @param type   $excludedUserAgents
-     * @param type   $keepURLFragments
-     * @param type   $type
+     * @param string|null $siteName
+     * @param string|null $urls
+     * @param string|null $ecommerce
+     * @param string|null $siteSearch
+     * @param string|null $searchKeywordParameters
+     * @param string|null $searchCategoryParameters
+     * @param string|null $excludedIps
+     * @param string|null $excludedQueryParameters
+     * @param string|null $timezone
+     * @param string|null $currency
+     * @param string|null $group
+     * @param string|null $startDate
+     * @param string|null $excludedUserAgents
+     * @param string|null $keepURLFragments
+     * @param string|null $type $type
      *
      * @return bool
      *
      * @throws PrestaShopException
+     * @throws \GuzzleHttp\Exception\GuzzleException
      */
     public static function updatePiwikSite(
         $idSite,
@@ -269,8 +281,9 @@ class PKHelper
     /**
      * get all website groups
      *
-     * @return array|boolean
+     * @return array|false
      * @throws PrestaShopException
+     * @throws \GuzzleHttp\Exception\GuzzleException
      */
     public static function getSitesGroups()
     {
@@ -288,12 +301,13 @@ class PKHelper
      * Get users token auth from Piwik
      * NOTE: password is required either an md5 encoded password or a normal string
      *
-     * @param string $userLogin   the user name
-     * @param string $password    password as clear text string
-     * @param string $md5Password md5 encoded password
+     * @param string $userLogin the user name
+     * @param string|null $password password as clear text string
+     * @param string|null $md5Password md5 encoded password
      *
      * @return string|boolean
      * @throws PrestaShopException
+     * @throws \GuzzleHttp\Exception\GuzzleException
      */
     public static function getTokenAuth($userLogin, $password = null, $md5Password = null)
     {
@@ -328,6 +342,7 @@ class PKHelper
      *
      * @return array
      * @throws PrestaShopException
+     * @throws \GuzzleHttp\Exception\GuzzleException
      */
     public static function getPiwikImageTrackingCode()
     {
@@ -377,9 +392,10 @@ class PKHelper
      *
      * @param int $idSite
      *
-     * @return stdClass[]|false
+     * @return stdClass|false
      *
      * @throws PrestaShopException
+     * @throws \GuzzleHttp\Exception\GuzzleException
      */
     public static function getPiwikSite($idSite = 0)
     {
@@ -426,10 +442,11 @@ class PKHelper
     }
 
     /**
-     * @param int $idSite
+* @param int $idSite
      *
-     * @return bool|false|stdClass[]
+     * @return bool|false|stdClass
      * @throws PrestaShopException
+     * @throws \GuzzleHttp\Exception\GuzzleException
      */
     public static function getPiwikSite2($idSite = 0)
     {
@@ -455,6 +472,7 @@ class PKHelper
      * @return array
      *
      * @throws PrestaShopException
+     * @throws \GuzzleHttp\Exception\GuzzleException
      */
     public static function getTimezonesList()
     {
@@ -476,9 +494,10 @@ class PKHelper
     }
 
     /**
-     * @return array|mixed
+     * @return array|false
      *
      * @throws PrestaShopException
+     * @throws \GuzzleHttp\Exception\GuzzleException
      */
     public static function getSitesWithViewAccess()
     {
@@ -505,8 +524,9 @@ class PKHelper
      *
      * @param boolean $fetchAliasUrls
      *
-     * @return stdClass[]
+     * @return array|false
      * @throws PrestaShopException
+     * @throws \GuzzleHttp\Exception\GuzzleException
      */
     public static function getMyPiwikSites($fetchAliasUrls = false)
     {
@@ -518,8 +538,9 @@ class PKHelper
      *
      * @param bool $fetchAliasUrls
      *
-     * @return stdClass[]
+     * @return array|false
      * @throws PrestaShopException
+     * @throws \GuzzleHttp\Exception\GuzzleException
      */
     public static function getSitesWithAdminAccess($fetchAliasUrls = false)
     {
@@ -546,6 +567,7 @@ class PKHelper
      * @return array
      *
      * @throws PrestaShopException
+     * @throws \GuzzleHttp\Exception\GuzzleException
      */
     public static function getMyPiwikSiteIds()
     {
@@ -636,8 +658,9 @@ class PKHelper
      *
      * @param string $url the full http(s) url to use for fetching the api result
      *
-     * @return boolean
+     * @return array|false
      * @throws PrestaShopException
+     * @throws \GuzzleHttp\Exception\GuzzleException
      */
     protected static function getAsJsonDecoded($url)
     {
@@ -650,11 +673,12 @@ class PKHelper
     }
 
     /**
-     * @param       $url
+     * @param string $url
      * @param array $headers
      *
-     * @return bool|mixed|string
+     * @return false|string
      * @throws PrestaShopException
+     * @throws \GuzzleHttp\Exception\GuzzleException
      */
     public static function getHttp($url, $headers = [])
     {
@@ -724,7 +748,7 @@ class PKHelper
     }
 
     /**
-     * @param      $string
+     * @param string $string
      * @param bool $specific
      *
      * @return string

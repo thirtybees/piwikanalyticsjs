@@ -36,7 +36,7 @@ class PiwikAnalyticsJSPiwikModuleFrontController extends ModuleFrontController
      * PiwikAnalyticsJSPiwikModuleFrontController constructor.
      *
      * @throws PrestaShopException
-     * @throws Adapter_Exception
+     * @throws \GuzzleHttp\Exception\GuzzleException
      */
     public function __construct()
     {
@@ -158,11 +158,11 @@ class PiwikAnalyticsJSPiwikModuleFrontController extends ModuleFrontController
     /**
      * Get array value
      *
-     * @param array  $array
+     * @param array $array
      * @param string $key
-     * @param mixed  $value
+     * @param string|null $value
      *
-     * @return mixed
+     * @return string|null
      */
     protected function arrayValue($array, $key, $value = null)
     {
