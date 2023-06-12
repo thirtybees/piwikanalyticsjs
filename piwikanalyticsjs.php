@@ -1017,7 +1017,7 @@ class PiwikAnalyticsJs extends Module
      * @throws SmartyException
      * @since 0.8
      */
-    public function hookdisplayMaintenance($params)
+    public function hookDisplayMaintenance($params)
     {
         return $this->hookFooter($params);
     }
@@ -1298,7 +1298,7 @@ class PiwikAnalyticsJs extends Module
      * @throws PrestaShopException
      * @throws SmartyException
      */
-    public function hookdisplayRightColumnProduct($param)
+    public function hookDisplayRightColumnProduct($param)
     {
         if ((int) Configuration::get(static::SITEID) <= 0) {
             return '';
@@ -1308,19 +1308,6 @@ class PiwikAnalyticsJs extends Module
         }
 
         return '';
-    }
-
-    /**
-     * only checks that the module is registered in hook "footer",
-     * this why we only appent javescript to the end of the page!
-     *
-     * @throws PrestaShopException
-     */
-    public function hookHeader()
-    {
-        if (!$this->isRegisteredInHook('footer')) {
-            $this->registerHook('footer');
-        }
     }
 
     /**
@@ -1443,7 +1430,7 @@ class PiwikAnalyticsJs extends Module
      * @return string
      * @throws PrestaShopException
      */
-    public function hookactionSearch($param)
+    public function hookActionSearch($param)
     {
         if ((int) Configuration::get(static::SITEID) <= 0) {
             return '';
@@ -1490,9 +1477,7 @@ class PiwikAnalyticsJs extends Module
 
         return (
             parent::install() &&
-            $this->registerHook('header') &&
             $this->registerHook('footer') &&
-            $this->registerHook('displayBackOfficeHeader') &&
             $this->registerHook('actionSearch') &&
             $this->registerHook('displayRightColumnProduct') &&
             $this->registerHook('orderConfirmation') &&
