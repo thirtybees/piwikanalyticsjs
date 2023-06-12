@@ -68,7 +68,7 @@ class PiwikAnalyticsController extends ModuleAdminController
         $user = Configuration::get('PIWIK_USRNAME');
         // 'PIWIK' . 'USRPASSWD'
         $passwd = Configuration::get('PIWIK_USRPASSWD');
-        if ((!empty($user) && $user !== false) && (!empty($passwd) && $passwd !== false)) {
+        if (!empty($user) && !empty($passwd)) {
             $this->page_header_toolbar_btn['stats'] = [
                 'href'   => $http.$PIWIK_HOST.'index.php?module=Login&action=logme&login='.$user.'&password='.md5($passwd).'&idSite='.$PIWIK_SITEID,
                 'desc'   => $this->l('Matomo'),
@@ -90,16 +90,12 @@ class PiwikAnalyticsController extends ModuleAdminController
 
 
             $PIWIK_TOKEN_AUTH = Configuration::get('PIWIK_TOKEN_AUTH');
-            if ((empty($PIWIK_HOST) || $PIWIK_HOST === false) ||
-                ($PIWIK_SITEID <= 0 || $PIWIK_SITEID === false) ||
-                (empty($PIWIK_TOKEN_AUTH) || $PIWIK_TOKEN_AUTH === false)) {
-
+            if (empty($PIWIK_HOST) || ($PIWIK_SITEID <= 0) || empty($PIWIK_TOKEN_AUTH)) {
                 $this->content .= "<h3 style=\"padding: 90px;\">{$this->l("You need to set 'Piwik host url', 'Piwik token auth' and 'Piwik site id', and save them before the dashboard can be shown here")}</h3>";
             } else {
                 $this->content .= <<< EOF
 <script type="text/javascript">
   function WidgetizeiframeDashboardLoaded() {
-      var w = $('#content').width();
       var h = $('body').height();
       $('#WidgetizeiframeDashboard').width('100%');
       $('#WidgetizeiframeDashboard').height(h);
@@ -114,8 +110,8 @@ EOF;
                     $period = "day";
                     $date = "today";
                 }
-                $this->content .= ''
-                    .'<iframe id="WidgetizeiframeDashboard"  onload="WidgetizeiframeDashboardLoaded();" '
+                $this->content .= (
+                    '<iframe id="WidgetizeiframeDashboard"  onload="WidgetizeiframeDashboardLoaded();" '
                     .'src="'.$http
                     .$PIWIK_HOST.'index.php'
                     .'?module=Widgetize'
@@ -127,7 +123,8 @@ EOF;
                     .'&token_auth='.$PIWIK_TOKEN_AUTH
                     .'&language='.$lng->iso_code
                     .'&date='.$date
-                    .'" frameborder="0" marginheight="0" marginwidth="0" width="100%" height="550px"></iframe>';
+                    .'" frameborder="0" marginheight="0" marginwidth="0" width="100%" height="550px"></iframe>'
+                );
             }
         }
 

@@ -26,7 +26,7 @@
 
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\ClientException;
-use GuzzleHttp\Exception\TransferException;
+use GuzzleHttp\Exception\GuzzleException;
 
 if (!defined('_TB_VERSION_')) {
     exit;
@@ -116,10 +116,12 @@ class PKHelper
      * @var string
      */
     public static $httpAuthUsername = '';
+
     /**
      * @var string
      */
     public static $httpAuthPassword = '';
+
     /**
      * @var string
      */
@@ -133,7 +135,9 @@ class PKHelper
      */
     const DEBUGLOG = 1;
 
-    /** @var FileLogger */
+    /**
+     * @var FileLogger
+     */
     private static $_debug_logger = null;
 
     /** @var FileLogger */
@@ -189,10 +193,9 @@ class PKHelper
      * @param string|null $keepURLFragments
      * @param string|null $type $type
      *
-     * @return bool
+     * @return bool|string
      *
      * @throws PrestaShopException
-     * @throws \GuzzleHttp\Exception\GuzzleException
      */
     public static function updatePiwikSite(
         $idSite,
@@ -283,7 +286,6 @@ class PKHelper
      *
      * @return array|false
      * @throws PrestaShopException
-     * @throws \GuzzleHttp\Exception\GuzzleException
      */
     public static function getSitesGroups()
     {
@@ -307,13 +309,12 @@ class PKHelper
      *
      * @return string|boolean
      * @throws PrestaShopException
-     * @throws \GuzzleHttp\Exception\GuzzleException
      */
     public static function getTokenAuth($userLogin, $password = null, $md5Password = null)
     {
-        if ($password === null || empty($password)) {
+        if (empty($password)) {
             $password = $md5Password;
-            if ($md5Password === null || empty($md5Password)) {
+            if (empty($md5Password)) {
                 static::$error = static::l('A password is required for method PKHelper::getTokenAuth()!');
                 static::$errors[] = static::$error;
 
@@ -342,7 +343,6 @@ class PKHelper
      *
      * @return array
      * @throws PrestaShopException
-     * @throws \GuzzleHttp\Exception\GuzzleException
      */
     public static function getPiwikImageTrackingCode()
     {
@@ -369,7 +369,7 @@ class PKHelper
         }
         if (static::$_cachedResults[$md5Url] !== false) {
             $ret['default'] = htmlentities('<noscript>'.static::$_cachedResults[$md5Url]['value'].'</noscript>');
-            if ((bool) Configuration::get('PS_REWRITING_SETTINGS')) {
+            if (Configuration::get('PS_REWRITING_SETTINGS')) {
                 $ret['proxy'] = str_replace(
                     Configuration::get(PiwikAnalyticsJs::HOST).'piwik.php',
                     Configuration::get('PIWIK'.'PROXY_SCRIPT'),
@@ -392,10 +392,9 @@ class PKHelper
      *
      * @param int $idSite
      *
-     * @return stdClass|false
+     * @return array|false
      *
      * @throws PrestaShopException
-     * @throws \GuzzleHttp\Exception\GuzzleException
      */
     public static function getPiwikSite($idSite = 0)
     {
@@ -442,11 +441,10 @@ class PKHelper
     }
 
     /**
-* @param int $idSite
+     * @param int $idSite
      *
-     * @return bool|false|stdClass
+     * @return array|false
      * @throws PrestaShopException
-     * @throws \GuzzleHttp\Exception\GuzzleException
      */
     public static function getPiwikSite2($idSite = 0)
     {
@@ -472,7 +470,6 @@ class PKHelper
      * @return array
      *
      * @throws PrestaShopException
-     * @throws \GuzzleHttp\Exception\GuzzleException
      */
     public static function getTimezonesList()
     {
@@ -497,7 +494,6 @@ class PKHelper
      * @return array|false
      *
      * @throws PrestaShopException
-     * @throws \GuzzleHttp\Exception\GuzzleException
      */
     public static function getSitesWithViewAccess()
     {
@@ -526,7 +522,6 @@ class PKHelper
      *
      * @return array|false
      * @throws PrestaShopException
-     * @throws \GuzzleHttp\Exception\GuzzleException
      */
     public static function getMyPiwikSites($fetchAliasUrls = false)
     {
@@ -540,7 +535,6 @@ class PKHelper
      *
      * @return array|false
      * @throws PrestaShopException
-     * @throws \GuzzleHttp\Exception\GuzzleException
      */
     public static function getSitesWithAdminAccess($fetchAliasUrls = false)
     {
@@ -567,7 +561,6 @@ class PKHelper
      * @return array
      *
      * @throws PrestaShopException
-     * @throws \GuzzleHttp\Exception\GuzzleException
      */
     public static function getMyPiwikSiteIds()
     {
@@ -607,8 +600,8 @@ class PKHelper
             $https = (bool) Configuration::get(PiwikAnalyticsJs::CRHTTPS);
         }
 
-        if (static::$piwikHost == '' || static::$piwikHost === false) {
-            static::$piwikHost = Configuration::get(PiwikAnalyticsJs::HOST);
+        if (! static::$piwikHost) {
+            static::$piwikHost = (string)Configuration::get(PiwikAnalyticsJs::HOST);
         }
 
         if ($pkHost === null) {
@@ -660,7 +653,6 @@ class PKHelper
      *
      * @return array|false
      * @throws PrestaShopException
-     * @throws \GuzzleHttp\Exception\GuzzleException
      */
     protected static function getAsJsonDecoded($url)
     {
@@ -678,7 +670,6 @@ class PKHelper
      *
      * @return false|string
      * @throws PrestaShopException
-     * @throws \GuzzleHttp\Exception\GuzzleException
      */
     public static function getHttp($url, $headers = [])
     {
@@ -687,11 +678,11 @@ class PKHelper
         $lng = strtolower((isset(Context::getContext()->language->iso_code) ? Context::getContext()->language->iso_code : 'en'));
         $timeout = 5; // should go in module conf
 
-        if (static::$httpAuthUsername == "" || static::$httpAuthUsername === false) {
-            static::$httpAuthUsername = Configuration::get(PiwikAnalyticsJs::PAUTHUSR);
+        if (! static::$httpAuthUsername) {
+            static::$httpAuthUsername = (string)Configuration::get(PiwikAnalyticsJs::PAUTHUSR);
         }
-        if (static::$httpAuthPassword == "" || static::$httpAuthPassword === false) {
-            static::$httpAuthPassword = Configuration::get(PiwikAnalyticsJs::PAUTHPWD);
+        if (! static::$httpAuthPassword) {
+            static::$httpAuthPassword = (string)Configuration::get(PiwikAnalyticsJs::PAUTHPWD);
         }
 
         $httpauth_usr = static::$httpAuthUsername;
@@ -699,7 +690,7 @@ class PKHelper
 
         PKHelper::debugLogger('Using \'file_get_contents\' to fetch remote');
         $httpauth = '';
-        if ((!empty($httpauth_usr) && !is_null($httpauth_usr) && $httpauth_usr !== false) && (!empty($httpauth_pwd) && !is_null($httpauth_pwd) && $httpauth_pwd !== false)) {
+        if (!empty($httpauth_usr) && !empty($httpauth_pwd)) {
             $httpauth = "Authorization: Basic ".base64_encode("$httpauth_usr:$httpauth_pwd")."\r\n";
         }
         $headers = (!empty($headers) ? implode('', $headers) : "Accept-language: {$lng}\r\n").$httpauth;
@@ -719,21 +710,23 @@ class PKHelper
         try {
             $result = (string) $guzzle->get($url)->getBody();
         } catch (ClientException $e) {
-            $response = (string) $e->getResponse()->getBody();
-            PKHelper::debugLogger("request returned ERROR: http response: {$response}.");
+            $responseInterface = $e->getResponse();
+            $body = (string) $responseInterface->getBody();
+            PKHelper::debugLogger("request returned ERROR: http response: {$body}.");
             $headerString = '';
-            foreach ($e->getResponse()->getHeaders() as $key => $header) {
+            foreach ($responseInterface->getHeaders() as $key => $headerValues) {
+                $header = implode(', ', $headerValues);
                 $headerString .= "$key:$header\r\n";
             }
-            PKHelper::debugLogger("$http_response_header: {$headerString}");
+            PKHelper::debugLogger("http_response_header: {$headerString}");
             if (!$_error2) {
-                static::$error = sprintf(static::l('Unable to connect to the API%s'), " {$response}");
+                static::$error = sprintf(static::l('Unable to connect to the API%s'), " {$body}");
                 static::$errors[] = static::$error;
                 $_error2 = true;
                 PKHelper::debugLogger('Last error message: '.static::$error);
             }
             return false;
-        } catch (TransferException $e) {
+        } catch (GuzzleException $e) {
             PKHelper::debugLogger("request returned ERROR: http response: {$e->getMessage()}");
             return false;
         } catch (Exception $e) {

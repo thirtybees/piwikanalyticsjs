@@ -36,13 +36,12 @@ class PiwikAnalyticsJSPiwikModuleFrontController extends ModuleFrontController
      * PiwikAnalyticsJSPiwikModuleFrontController constructor.
      *
      * @throws PrestaShopException
-     * @throws \GuzzleHttp\Exception\GuzzleException
      */
     public function __construct()
     {
         parent::__construct();
         PKHelper::debugLogger('START: PiwikAnalyticsJSPiwikModuleFrontController::__construct();');
-        $matomoUrl = ((bool) Configuration::get('PIWIK_CRHTTPS') ? 'https://' : 'http://').Configuration::get('PIWIK_HOST');
+        $matomoUrl = (Configuration::get('PIWIK_CRHTTPS') ? 'https://' : 'http://').Configuration::get('PIWIK_HOST');
 
         // Edit the line below, and replace xyz by the token_auth for the user "UserTrackingAPI"
         // which you created when you followed instructions above.
@@ -152,7 +151,7 @@ class PiwikAnalyticsJSPiwikModuleFrontController extends ModuleFrontController
     {
         if (!headers_sent()) {
             header($header, $replace);
-        };
+        }
     }
 
     /**

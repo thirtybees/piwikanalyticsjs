@@ -77,13 +77,18 @@ class PiwikAnalyticsJs extends Module
     const GROUP_ID = 'PIWIK_GROUP_ID';
     const GROUP_NAME = 'PIWIK_GROUP_NAME';
     const SITE_SEARCH = 'PIWIK_SITE_SEARCH';
-    const TAPID = 'PIWIK_TAPID';
     const CART_PRODUCTS = 'PIWIK_CART_PRODUCTS';
     const CART_TOTAL = 'PIWIK_CART_TOTAL';
     const PRODUCTS = 'PIWIK_PRODUCTS';
-    /** @var bool $isOrder */
+
+    /**
+     * @var bool $isOrder
+     */
     private static $isOrder = false;
-    /** @var bool $matomoSite */
+
+    /**
+     * @var array|false $matomoSite
+     */
     protected $matomoSite = false;
 
     /**
@@ -127,10 +132,10 @@ class PiwikAnalyticsJs extends Module
      * get content to display in the admin area
      *
      * @return string
+     *
      * @throws PrestaShopDatabaseException
      * @throws PrestaShopException
      * @throws SmartyException
-     * @throws \GuzzleHttp\Exception\GuzzleException
      * @global string $currentIndex
      */
     public function getContent()
@@ -174,7 +179,6 @@ class PiwikAnalyticsJs extends Module
             $languages[$languages_key]['is_default'] = ($languages_value['id_lang'] == (int) Configuration::get('PS_LANG_DEFAULT') ? true : false);
         }
         $helper = new HelperForm();
-        $helper->module = $this;
 
         $helper->languages = $languages;
         $helper->module = $this;
@@ -785,13 +789,13 @@ class PiwikAnalyticsJs extends Module
             }
 
             if (Tools::getIsset('httpUser')) {
-                PKHelper::$httpAuthUsername = Tools::getValue('httpUser');
+                PKHelper::$httpAuthUsername = (string)Tools::getValue('httpUser');
             }
             if (Tools::getIsset('httpPasswd')) {
-                PKHelper::$httpAuthPassword = Tools::getValue('httpPasswd');
+                PKHelper::$httpAuthPassword = (string)Tools::getValue('httpPasswd');
             }
             if (Tools::getIsset('piwikhost')) {
-                PKHelper::$piwikHost = Tools::getValue('piwikhost');
+                PKHelper::$piwikHost = (string)Tools::getValue('piwikhost');
             }
 
             PKHelper::debugLogger("__pkapicall():\n\t- Call PKHelper::".$apiMethod);
@@ -813,7 +817,7 @@ class PiwikAnalyticsJs extends Module
                     if (is_object($result)) {
                         $message = $result;
                     } else {
-                        $message = (is_string($result) && !is_bool($result) ? $result : (is_array($result) ? implode(', ', $result) : true));
+                        $message = (is_string($result) ? $result : (is_array($result) ? implode(', ', $result) : true));
                     }
                 }
 
@@ -836,6 +840,9 @@ class PiwikAnalyticsJs extends Module
     protected function processFormsUpdate()
     {
         if (Tools::isSubmit('submitUpdate'.$this->name)) {
+            /** @var AdminController $controller */
+            $controller = $this->context->controller;
+
             if (Tools::getIsset(static::HOST)) {
                 $tmp = Tools::getValue(static::HOST, '');
                 if (!empty($tmp) && (filter_var($tmp, FILTER_VALIDATE_URL) || filter_var('http://'.$tmp, FILTER_VALIDATE_URL))) {
@@ -845,21 +852,21 @@ class PiwikAnalyticsJs extends Module
                     }
                     Configuration::updateValue(static::HOST, $tmp);
                 } else {
-                    $this->context->controller->errors[] = $this->l('Matomo host cannot be empty');
+                    $controller->errors[] = $this->l('Matomo host cannot be empty');
                 }
             }
             if (Tools::getIsset(static::SITEID)) {
                 $tmp = (int) Tools::getValue(static::SITEID, 0);
                 Configuration::updateValue(static::SITEID, $tmp);
                 if ($tmp <= 0) {
-                    $this->context->controller->errors[] = $this->l('Matomo site id is lower or equal to "0"');
+                    $controller->errors[] = $this->l('Matomo site id is lower or equal to "0"');
                 }
             }
             if (Tools::getIsset(static::TOKEN_AUTH)) {
                 $tmp = Tools::getValue(static::TOKEN_AUTH, '');
                 Configuration::updateValue(static::TOKEN_AUTH, $tmp);
                 if (empty($tmp)) {
-                    $this->context->controller->errors[] = $this->l('Matomo auth token is empty');
+                    $controller->errors[] = $this->l('Matomo auth token is empty');
                 }
             }
             /* setReferralCookieTimeout */
@@ -935,8 +942,8 @@ class PiwikAnalyticsJs extends Module
                 Configuration::updateValue(static::DREPDATE, Tools::getValue(static::DREPDATE, 'day|tody'));
             }
 
-            if (empty($this->context->controller->errors)) {
-                $this->context->controller->confirmations[] = $this->l('Configuration Updated');
+            if (! $controller->errors) {
+                $controller->confirmations[] = $this->l('Configuration Updated');
             }
         }
     }
@@ -1016,12 +1023,15 @@ class PiwikAnalyticsJs extends Module
     }
 
     /**
+     * @paaram array $params
+     *
      * @return string
+     *
      * @throws PrestaShopDatabaseException
      * @throws PrestaShopException
      * @throws SmartyException
      */
-    public function hookFooter()
+    public function hookFooter($params)
     {
         if ((int) Configuration::get(static::SITEID) <= 0) {
             return '';
@@ -1034,16 +1044,13 @@ class PiwikAnalyticsJs extends Module
         $this->setDefaultConfig();
         $this->context->smarty->assign(static::ORDER, false);
 
-        /* cart tracking */
-        if (!$this->context->cookie->PIWIKTrackCartFooter) {
-            $this->context->cookie->PIWIKTrackCartFooter = time();
-        }
-        if (strtotime($this->context->cart->date_upd) >= $this->context->cookie->PIWIKTrackCartFooter) {
-            $this->context->cookie->PIWIKTrackCartFooter = strtotime($this->context->cart->date_upd) + 2;
+        $cartTimestamp = (int)strtotime($this->context->cart->date_upd);
+        if ($cartTimestamp >= $this->getTrackTimestamp()) {
+            $this->setTrackTimestamp($cartTimestamp + 2);
             $smarty_ad = [];
 
             $Currency = new Currency($this->context->cart->id_currency);
-            foreach ($this->context->cart->getProducts() as $key => $value) {
+            foreach ($this->context->cart->getProducts() as $value) {
                 if (!isset($value['id_product']) || !isset($value['name']) || !isset($value['total_wt']) || !isset($value['quantity'])) {
                     continue;
                 }
@@ -1079,7 +1086,7 @@ class PiwikAnalyticsJs extends Module
 
         $is404 = false;
         if (!empty($this->context->controller->errors)) {
-            foreach ($this->context->controller->errors as $key => $value) {
+            foreach ($this->context->controller->errors as $value) {
                 if ($value == Tools::displayError('Product not found')) {
                     $is404 = true;
                 }
@@ -1111,7 +1118,7 @@ class PiwikAnalyticsJs extends Module
         $this->context->smarty->assign(static::USE_PROXY, (bool) Configuration::get(static::USE_PROXY));
 
         //* using proxy script?
-        if ((bool) Configuration::get(static::USE_PROXY)) {
+        if (Configuration::get(static::USE_PROXY)) {
             $this->context->smarty->assign(static::HOST, Configuration::get(static::PROXY_SCRIPT));
         } else {
             $this->context->smarty->assign(static::HOST, Configuration::get(static::HOST));
@@ -1120,19 +1127,19 @@ class PiwikAnalyticsJs extends Module
         $this->context->smarty->assign(static::SITEID, Configuration::get(static::SITEID));
 
         $pkvct = (int) Configuration::get(static::COOKIE_TIMEOUT); /* no iset if the same as default */
-        if ($pkvct != 0 && $pkvct !== false && ($pkvct != (int) (static::PK_VC_TIMEOUT * 60))) {
+        if ($pkvct != 0 && ($pkvct != (int) (static::PK_VC_TIMEOUT * 60))) {
             $this->context->smarty->assign(static::COOKIE_TIMEOUT, $pkvct);
         }
         unset($pkvct);
 
         $pkrct = (int) Configuration::get(static::RCOOKIE_TIMEOUT); /* no iset if the same as default */
-        if ($pkrct != 0 && $pkrct !== false && ($pkrct != (int) (static::PK_RC_TIMEOUT * 60))) {
+        if ($pkrct != 0 && ($pkrct != (int) (static::PK_RC_TIMEOUT * 60))) {
             $this->context->smarty->assign(static::RCOOKIE_TIMEOUT, $pkrct);
         }
         unset($pkrct);
 
         $pksct = (int) Configuration::get(static::SESSION_TIMEOUT); /* no iset if the same as default */
-        if ($pksct != 0 && $pksct !== false && ($pksct != (int) (static::PK_SC_TIMEOUT * 60))) {
+        if ($pksct != 0 && ($pksct != (int) (static::PK_SC_TIMEOUT * 60))) {
             $this->context->smarty->assign(static::SESSION_TIMEOUT, $pksct);
         }
         unset($pksct);
@@ -1157,7 +1164,7 @@ class PiwikAnalyticsJs extends Module
         }
         unset($PIWIK_SET_DOMAINS);
 
-        if ((bool) Configuration::get(static::DNT)) {
+        if (Configuration::get(static::DNT)) {
             $this->context->smarty->assign(static::DNT, "_paq.push([\"setDoNotTrack\", true]);");
         }
 
@@ -1184,15 +1191,15 @@ class PiwikAnalyticsJs extends Module
      */
     protected function parseProductSku($id, $attrid = false, $ref = false)
     {
-        if (Validate::isInt($id) && (!empty($attrid) && !is_null($attrid) && $attrid !== false) && (!empty($ref) && !is_null($ref) && $ref !== false)) {
+        if (Validate::isInt($id) && !empty($attrid) && !empty($ref)) {
             $PIWIK_PRODID_V1 = Configuration::get(static::PRODID_V1);
 
             return str_replace(['{ID}', '{ATTRID}', '{REFERENCE}'], [$id, $attrid, $ref], $PIWIK_PRODID_V1);
-        } elseif (Validate::isInt($id) && (!empty($ref) && !is_null($ref) && $ref !== false)) {
+        } elseif (Validate::isInt($id) && !empty($ref)) {
             $PIWIK_PRODID_V2 = Configuration::get(static::PRODID_V2);
 
             return str_replace(['{ID}', '{REFERENCE}'], [$id, $ref], $PIWIK_PRODID_V2);
-        } elseif (Validate::isInt($id) && (!empty($attrid) && !is_null($attrid) && $attrid !== false)) {
+        } elseif (Validate::isInt($id) && !empty($attrid)) {
             $PIWIK_PRODID_V3 = Configuration::get(static::PRODID_V3);
 
             return str_replace(['{ID}', '{ATTRID}'], [$id, $attrid], $PIWIK_PRODID_V3);
@@ -1239,7 +1246,7 @@ class PiwikAnalyticsJs extends Module
         $controller = $this->context->controller;
         if ($controller instanceof ProductController) {
             $products = [['product' => $controller->getProduct(), 'categorys' => null]];
-            if (isset($products) && isset($products[0]['product'])) {
+            if (isset($products[0]['product'])) {
                 $smarty_ad = [];
                 foreach ($products as $product) {
                     if (!Validate::isLoadedObject($product['product'])) {
@@ -1347,7 +1354,7 @@ class PiwikAnalyticsJs extends Module
                     'CATEGORY' => $this->getCategoryNamesByProduct($value['product_id']),
                     'PRICE'    => $this->currencyConversion(
                         [
-                            'price'           => (isset($value['total_price_tax_incl']) ? floatval($value['total_price_tax_incl']) : (isset($value['total_price_tax_incl']) ? floatval($value['total_price_tax_incl']) : 0.00)),
+                            'price'           => (isset($value['total_price_tax_incl']) ? floatval($value['total_price_tax_incl']) : 0.00),
                             'conversion_rate' => (isset($params['objOrder']->conversion_rate) ? $params['objOrder']->conversion_rate : 0.00),
                         ]
                     ),
@@ -1408,6 +1415,7 @@ class PiwikAnalyticsJs extends Module
 
             return $this->display(__FILE__, 'views/templates/hook/jstracking.tpl');
         }
+        return '';
     }
 
     /**
@@ -1424,7 +1432,7 @@ class PiwikAnalyticsJs extends Module
         if ((int) Configuration::get(static::SITEID) <= 0) {
             return '';
         }
-        $this->hookactionSearch($params);
+        return $this->hookactionSearch($params);
     }
 
     /**
@@ -1469,61 +1477,27 @@ class PiwikAnalyticsJs extends Module
         foreach (Language::getLanguages(false) as $lang) {
             $tab->name[(int) $lang['id_lang']] = 'Piwik Analytics';
         }
+        $tab->class_name = 'PiwikAnalytics';
         $tab->module = 'piwikanalyticsjs';
         $tab->active = true;
-
-        if (method_exists('Tab', 'getInstanceFromClassName')) {
-            $tab->class_name = 'PiwikAnalytics';
-            $AdminParentStats = TabCore::getInstanceFromClassName('AdminStats');
-            if ($AdminParentStats == null || !($AdminParentStats instanceof Tab || $AdminParentStats instanceof TabCore) || $AdminParentStats->id == 0) {
-                $AdminParentStats = TabCore::getInstanceFromClassName('AdminParentStats');
-            }
-        } else {
-            if (method_exists('Tab', 'getIdFromClassName')) {
-                $tab->class_name = 'PiwikAnalytics';
-                $tmpId = TabCore::getIdFromClassName('AdminStats');
-                if ($tmpId != null && $tmpId > 0) {
-                    $AdminParentStats = new Tab($tmpId);
-                } else {
-                    $tmpId = TabCore::getIdFromClassName('AdminParentStats');
-                    if ($tmpId != null && $tmpId > 0) {
-                        $AdminParentStats = new Tab($tmpId);
-                    }
-                }
-            }
-        }
-
-        $tab->id_parent = (isset($AdminParentStats) && ($AdminParentStats instanceof Tab || $AdminParentStats instanceof TabCore) ? $AdminParentStats->id : -1);
-        if ($tab->add()) {
-            Configuration::updateValue(static::TAPID, (int) $tab->id);
-        } else {
-            $this->_errors[] = sprintf($this->l('Unable to create new tab "Piwik Analytics", Please forward tthe following info to the developer %s'), "<br/>"
-                .(isset($AdminParentStats) ? "isset(\$AdminParentStats): True" : "isset(\$AdminParentStats): False")
-                ."<br/>"
-                ."Type of \$AdminParentStats: ".gettype($AdminParentStats)
-                ."<br/>"
-                ."Class name of \$AdminParentStats: ".get_class($AdminParentStats)
-                ."<br/>"
-                .(($AdminParentStats instanceof Tab || $AdminParentStats instanceof TabCore) ? "\$AdminParentStats instanceof Tab: True" : "\$AdminParentStats instanceof Tab: False")
-                ."<br/>"
-                .(($AdminParentStats instanceof Tab || $AdminParentStats instanceof TabCore) ? "\$AdminParentStats->id: ".$AdminParentStats->id : "\$AdminParentStats->id: ?0?")
-                ."<br/>"
-                .(($AdminParentStats instanceof Tab || $AdminParentStats instanceof TabCore) ? "\$AdminParentStats->name: ".$AdminParentStats->name : "\$AdminParentStats->name: ?0?")
-                ."<br/>"
-                .(($AdminParentStats instanceof Tab || $AdminParentStats instanceof TabCore) ? "\$AdminParentStats->class_name: ".$AdminParentStats->class_name : "\$AdminParentStats->class_name: ?0?")
-                ."<br/>"
-                ."thirty bees version: "._TB_VERSION_
-                ."<br/>"
-                ."PHP version: ".PHP_VERSION
-            );
-        }
+        $tab->id_parent = (int)Tab::getIdFromClassName('AdminStats');
+        $tab->add();
 
         /* default values */
         foreach ($this->getConfigFields(false) as $key => $value) {
             Configuration::updateValue($key, $value);
         }
 
-        return (parent::install() && $this->registerHook('header') && $this->registerHook('footer') && $this->registerHook('displayBackOfficeHeader') && $this->registerHook('actionSearch') && $this->registerHook('displayRightColumnProduct') && $this->registerHook('orderConfirmation') && $this->registerHook('displayMaintenance'));
+        return (
+            parent::install() &&
+            $this->registerHook('header') &&
+            $this->registerHook('footer') &&
+            $this->registerHook('displayBackOfficeHeader') &&
+            $this->registerHook('actionSearch') &&
+            $this->registerHook('displayRightColumnProduct') &&
+            $this->registerHook('orderConfirmation') &&
+            $this->registerHook('displayMaintenance')
+        );
     }
 
     /**
@@ -1586,15 +1560,13 @@ class PiwikAnalyticsJs extends Module
             foreach ($this->getConfigFields(false) as $key => $value) {
                 Configuration::deleteByName($key);
             }
-            $adminParentStats = Tab::getInstanceFromClassName('PiwikAnalytics');
-            if (Validate::isLoadedObject($adminParentStats)) {
-                $adminParentStats->delete();
-            }
-            Configuration::deleteByName(static::TAPID);
 
+            /** @var Tab $tab */
+            foreach (Tab::getCollectionFromModule($this->name) as $tab) {
+                $tab->delete();
+            }
             return true;
         }
-
         return false;
     }
 
@@ -1622,5 +1594,29 @@ class PiwikAnalyticsJs extends Module
         }
 
         return $categories;
+    }
+
+    /**
+     * @return int
+     */
+    protected function getTrackTimestamp()
+    {
+        if (isset($this->context->cookie->PIWIKTrackCartFooter)) {
+            return (int)$this->context->cookie->PIWIKTrackCartFooter;
+        }
+        return $this->setTrackTimestamp(time());
+    }
+
+    /**
+     * @param int $time
+     *
+     * @return int
+     *
+     * @noinspection PhpUndefinedFieldInspection
+     */
+    protected function setTrackTimestamp($time)
+    {
+        $this->context->cookie->PIWIKTrackCartFooter = $time;
+        return $time;
     }
 }
