@@ -1044,7 +1044,7 @@ class PiwikAnalyticsJs extends Module
         $this->setDefaultConfig();
         $this->context->smarty->assign(static::ORDER, false);
 
-        $cartTimestamp = (int)strtotime($this->context->cart->date_upd);
+        $cartTimestamp = (int)strtotime((string)$this->context->cart->date_upd);
         if ($cartTimestamp >= $this->getTrackTimestamp()) {
             $this->setTrackTimestamp($cartTimestamp + 2);
             $smarty_ad = [];
