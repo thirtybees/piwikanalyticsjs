@@ -45,6 +45,7 @@
       _paq.push(['setReferralCookieTimeout', '{$PIWIK_RCOOKIE_TIMEOUT|escape:'javascript'}']);
     {/if}
       _paq.push(['enableLinkTracking']);
+      _paq.push(['disableAlwaysUseSendBeacon']);
     {if isset($PIWIK_UUID)}
       _paq.push(['setUserId', '{$PIWIK_UUID|escape:'javascript'}']);
       _paq.push(['setCustomVariable', 1, 'First Name', '{$cookie->customer_firstname|escape:'javascript'}', 'visit']);
