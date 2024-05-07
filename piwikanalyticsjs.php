@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright (C) 2017-2018 thirty bees
+ * Copyright (C) 2017-2024 thirty bees
  * Copyright (C) 2014 Christian Jensen
  *
  * This file is part of PiwikAnalyticsJS for prestashop.
